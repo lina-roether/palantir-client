@@ -13,6 +13,16 @@ export default tseslint.config(
 		]
 	},
 	{
+		rules: {
+			"@typescript-eslint/no-unnecessary-condition": [
+				"error",
+				{
+					allowConstantLoopConditions: true,
+				}
+			]
+		}
+	},
+	{
 		languageOptions: {
 			parserOptions: {
 				projectService: true,
