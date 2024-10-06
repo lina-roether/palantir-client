@@ -12,7 +12,10 @@
 		"checkJs": true
 	},
 	"include": [
-		"eslint.config.mjs",
-		"packages/**/*.ts"
+		"*.config.mjs",
+		"*.config.js",
+		"packages/**/*.ts",
+		"packages/*/*.config.mjs",
+		"packages/*/*.config.js"
 	],
 }
