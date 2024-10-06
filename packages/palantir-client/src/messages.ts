@@ -114,11 +114,13 @@ export interface MessageChannelEventMap {
 }
 
 export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
+	private ws: WebSocket;
 	private open = true;
 
-	private constructor(private readonly ws: WebSocket) {
+	private constructor(url: URL | string) {
 		super();
-		ws.addEventListener("message", (evt) => {
+		this.ws = new WebSocket(url);
+		this.ws.addEventListener("message", (evt) => {
 			try {
 				if (!(evt.data instanceof Uint8Array)) {
 					logger.error(`Expected to receive a Uint8Array, but got %o`, evt.data);
@@ -130,20 +132,13 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 				logger.error(`Failed to decode received message: %s`, e);
 			}
 		});
-		ws.addEventListener("error", () => {
+		this.ws.addEventListener("error", () => {
 			logger.error("Websocket disconnected due to an error.");
 			this.onClosed();
 		});
-		ws.addEventListener("close", () => {
+		this.ws.addEventListener("close", () => {
 			this.onClosed();
 		});
-	}
-
-	public static async connect(url: URL | string): Promise<MessageChannel> {
-		const ws = new WebSocket(url);
-		ws.binaryType = "arraybuffer";
-		await new Promise((res) => { ws.addEventListener("open", res); });
-		return new MessageChannel(ws);
 	}
 
 	public isOpen(): boolean {
