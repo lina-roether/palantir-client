@@ -1,4 +1,8 @@
 {
-  "name": "palantir-webextension",
-  "packageManager": "yarn@4.5.0"
+	"$schema": "https://json.schemastore.org/package",
+	"name": "palantir-webextension",
+	"packageManager": "yarn@4.5.0",
+	"dependencies": {
+		"tslib": "^2.7.0"
+	}
 }
