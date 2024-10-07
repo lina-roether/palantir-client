@@ -1,6 +1,5 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import vm from "node:vm";
 import swc from "@swc/core";
 import * as sass from "sass";
 import pug from "pug";
@@ -18,8 +17,14 @@ const DIST_DIR = path.resolve("dist");
 
 const ENVIRONMENT = process.env.ENVIRONMENT ?? "debug";
 const TARGET = process.env.TARGET ?? "firefox";
+const VERSION = process.env.npm_package_version;
 
-log.notice("Building for environment %s", ENVIRONMENT);
+if (!VERSION) {
+	logger.error("Failed to load package version");
+	process.exit(1);
+}
+
+log.notice("Building version %d for environment %s", VERSION, ENVIRONMENT);
 
 const ENTRY_POINT_MATCHER = /^\+([^.]+).(.+)$/;
 const ENTRY_POINT_TYPES = {
@@ -76,7 +81,7 @@ async function getBundles() {
 	for await (const entry of srcDir) {
 		const bundle = getBundle(entry);
 		if (!bundle) continue;
-		
+
 		if (bundle.distName in distFiles) {
 			const conflictBundle = distFiles[bundle.distName];
 			logger.error(
@@ -137,7 +142,7 @@ async function buildPug(bundle, context) {
 
 async function buildJsonEsm(bundle, context) {
 	logger.debug("Evaluating json generator %s", bundle.srcName);
-	const mod = await import(bundle.input);	
+	const mod = await import(bundle.input);
 	let value;
 	switch (typeof mod.default) {
 		case "function":
@@ -185,7 +190,7 @@ async function copyAssets() {
 	try {
 		const stat = await fs.stat(ASSETS_DIR);
 		if (!stat.isDirectory()) return;
-	} catch(e) {
+	} catch (e) {
 		if (e.code !== "ENOENT") logger.error(`${e}`);
 		return;
 	}
@@ -197,6 +202,7 @@ function createContext(bundles) {
 	return {
 		environment: ENVIRONMENT,
 		target: TARGET,
+		version: VERSION,
 		include(name) {
 			if (!name in bundles) {
 				throw new Error(`Bundle ${name} doesn't exist!`)
@@ -254,7 +260,7 @@ async function main() {
 		for (const error of runner.errors) {
 			logger.error(`${error}`);
 		}
-	} catch(e) {
+	} catch (e) {
 		logger.error(`Failed to build: ${e}`);
 	}
 }
