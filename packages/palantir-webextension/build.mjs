@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path"
 import swc from "@swc/core";
+import pug from "pug";
 import { Listr } from "listr2";
 import log from "log";
 import logNode from "log-node";
@@ -112,7 +113,17 @@ async function buildScss(bundle, context) {
 }
 
 async function buildPug(bundle, context) {
-	logger.warn("Bulding pug files is not yet supported!");
+	const sourceCode = await fs.readFile(bundle.input, { encoding: "utf-8" });
+
+	logger.debug("Compiling template %s with pug", bundle.srcName);
+	const template = pug.compile(sourceCode, {
+		filename: bundle.input,
+		basedir: SRC_DIR
+	});
+
+	const html = template(context);
+
+	await fs.writeFile(bundle.output, html);
 }
 
 async function buildJsonEsm(bundle, context) {
@@ -122,16 +133,16 @@ async function buildJsonEsm(bundle, context) {
 async function build(bundle, context) {
 	switch (bundle.type) {
 		case "typescript":
-			await buildTypescript(bundle);
+			await buildTypescript(bundle, context);
 			break;
 		case "scss":
-			await buildScss(bundle);
+			await buildScss(bundle, context);
 			break;
 		case "pug":
-			await buildPug(bundle);
+			await buildPug(bundle, context);
 			break;
 		case "json_build_esm":
-			await buildJsonEsm(bundle);
+			await buildJsonEsm(bundle, context);
 			break;
 		default:
 			throw new Error(`Unexpected bundle type '${type}'`);
@@ -147,8 +158,19 @@ async function preBuildCleanup() {
 	await fs.mkdir(DIST_DIR);
 }
 
+function createContext(bundles) {
+	return {
+		include(name) {
+			if (!name in bundles) {
+				throw new Error(`Bundle ${name} doesn't exist!`)
+			}
+			return bundles[name].distName
+		}
+	}
+}
+
 function createBundleBuildTasks(bundles) {
-	const context = { bundles };
+	const context = createContext(bundles);
 
 	const tasks = [];
 	for (const bundle of Object.values(bundles)) {

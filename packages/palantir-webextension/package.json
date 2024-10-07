@@ -13,6 +13,7 @@
 	"devDependencies": {
 		"@swc/core": "1.7.26",
 		"@types/log": "^6.3.3",
-		"listr2": "^8.2.5"
+		"listr2": "^8.2.5",
+		"pug": "^3.0.3"
 	}
 }
