@@ -2,7 +2,16 @@
 	"$schema": "https://json.schemastore.org/package",
 	"name": "palantir-webextension",
 	"packageManager": "yarn@4.5.0",
+	"scripts": {
+		"build": "node build.mjs"
+	},
 	"dependencies": {
+		"log": "^6.3.2",
+		"log-node": "^8.0.3",
 		"tslib": "^2.7.0"
+	},
+	"devDependencies": {
+		"@swc/core": "1.7.26",
+		"@types/log": "^6.3.3"
 	}
 }
