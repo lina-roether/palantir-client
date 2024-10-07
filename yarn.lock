@@ -354,6 +354,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/pug@npm:^2.0.10":
+  version: 2.0.10
+  resolution: "@types/pug@npm:2.0.10"
+  checksum: 10c0/6fac37fd84ad4bcf755061caad274db70591699739070bc30c5c1b5f0aecf98646dc29ec8da11cfca82a2b7cc57d949a3ae50aba2f88bf098751ebdd25d9aaea
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/eslint-plugin@npm:8.8.0":
   version: 8.8.0
   resolution: "@typescript-eslint/eslint-plugin@npm:8.8.0"
@@ -1698,6 +1705,7 @@ __metadata:
   dependencies:
     "@swc/core": "npm:1.7.26"
     "@types/log": "npm:^6.3.3"
+    "@types/pug": "npm:^2.0.10"
     listr2: "npm:^8.2.5"
     log: "npm:^6.3.2"
     log-node: "npm:^8.0.3"
