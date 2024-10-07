@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path"
 import swc from "@swc/core";
+import { Listr } from "listr2";
 import log from "log";
 import logNode from "log-node";
 
@@ -9,64 +10,90 @@ logNode();
 const logger = log.get("build");
 
 const SRC_DIR = path.resolve("src");
-const BUNDLES_DIR = path.join(SRC_DIR, "bundles");
 const DIST_DIR = path.resolve("dist");
 
 const ENVIRONMENT = process.env.ENVIRONMENT ?? "debug";
 
 log.notice("Building for environment %s", ENVIRONMENT);
 
-async function getBundleNames() {
-	const entries = await fs.readdir(BUNDLES_DIR, { withFileTypes: true });
-	const bundles = [];
-	for (const entry of entries) {
-		if (!entry.isDirectory()) continue;
-		bundles.push(entry.name);
+const ENTRY_POINT_MATCHER = /^\+([^.]+).(.+)$/;
+const ENTRY_POINT_TYPES = {
+	"ts": "typescript",
+	"scss": "scss",
+	"pug": "pug",
+	"json.mjs": "json_build_esm"
+}
+
+function getBundleDistName(name, type) {
+	switch (type) {
+		case "typescript":
+			return `${name}.js`
+		case "scss":
+			return `${name}.css`
+		case "pug":
+			return `${name}.html`
+		case "json_build_esm":
+			return `${name}.json`
+		default:
+			throw new Error(`Unexpected bundle type '${type}'`);
+	}
+}
+
+function getBundle(entry) {
+	if (!entry.isFile()) return null;
+
+	const result = ENTRY_POINT_MATCHER.exec(entry.name);
+	if (!result) return null;
+	const [_, name, extension] = result;
+	if (!(extension in ENTRY_POINT_TYPES)) {
+		return null;
+	}
+
+	const type = ENTRY_POINT_TYPES[extension];
+	const input = path.join(entry.parentPath, entry.name);
+	const distName = getBundleDistName(name, type);
+	const output = path.join(DIST_DIR, distName);
+	logger.debug("Found bundle of type %s at %s that will output to %s", type, input, output);
+	return {
+		srcName: entry.name,
+		distName,
+		input,
+		output,
+		type
+	};
+}
+
+async function getBundles() {
+	const distFiles = {};
+	const bundles = {};
+	logger.debug(`Searching %s for bundles...`, SRC_DIR)
+	const srcDir = await fs.opendir(SRC_DIR);
+	for await (const entry of srcDir) {
+		const bundle = getBundle(entry);
+		if (!bundle) continue;
+		
+		if (bundle.distName in distFiles) {
+			const conflictBundle = distFiles[bundle.distName];
+			logger.error(
+				"Failed to resolve bundle %s: file %s is already produced by bundle %s",
+				bundle.srcName,
+				bundle.distName,
+				conflictBundle.srcName
+			);
+			continue;
+		}
+		distFiles[bundle.distName] = bundle;
+		bundles[entry.name] = bundle;
 	}
 	return bundles;
 }
 
-async function getOptionalFile(baseDir, filename) {
-	const filepath = path.join(baseDir, filename)
-	try {
-		const indexTs = await fs.stat(filepath);
-		if (!indexTs.isFile()) return null;
-		return filepath;
-	} catch (e) {
-		if (e.code !== "ENOENT") {
-			console.log(`Cannot access file ${filepath}: ${e}`);
-		}
-		return null;
-	}
-}
-
-const TS_ENTRY_POINT = "index.ts";
-const PUG_ENTRY_POINT = "index.pug";
-const SCSS_ENTRY_POINT = "index.scss";
-
-async function getBundle(name) {
-	logger.info("Reading bundle %s", name);
-	const baseDir = path.join(BUNDLES_DIR, name);
-	return {
-		name,
-		baseDir,
-		entryPoints: {
-			ts: await getOptionalFile(baseDir, TS_ENTRY_POINT),
-			pug: await getOptionalFile(baseDir, PUG_ENTRY_POINT),
-			scss: await getOptionalFile(baseDir, SCSS_ENTRY_POINT)
-		}
-	}
-}
-
-async function buildTs(bundleName, entryPoint, outDir) {
-	const outFileName = `${bundleName}.js`
-
-	const outFile = path.join(outDir, outFileName);
-
-	const sourceCode = await fs.readFile(entryPoint, { encoding: "utf-8" });
+async function buildTypescript(bundle, context) {
+	const sourceCode = await fs.readFile(bundle.input, { encoding: "utf-8" });
+	logger.debug("Compiling bundle %s with swc", bundle.srcName);
 	const output = await swc.transform(sourceCode, {
-		filename: entryPoint,
-		outputPath: outFile,
+		filename: bundle.input,
+		outputPath: bundle.output,
 		sourceMaps: ENVIRONMENT === "debug",
 		isModule: true,
 		jsc: {
@@ -77,47 +104,40 @@ async function buildTs(bundleName, entryPoint, outDir) {
 			minify: ENVIRONMENT === "debug" ? undefined : {}
 		}
 	});
-	logger.debug("Outputting compiled javascript for %s to %s", entryPoint, outFile);
-	await fs.writeFile(outFile, output.code);
-
-	logger.notice("Built %s", outFileName);
-	return outFile;
+	await fs.writeFile(bundle.output, output.code);
 }
 
-async function buildScss(bundleName, entryPoint, outDir) {
-	logger.warning("Building scss files is not supported yet!")
-	return null;
+async function buildScss(bundle, context) {
+	logger.warn("Bulding scss files is not yet supported!");
 }
 
-async function buildPug(bundleName, entryPoint, outDir, files) {
-	logger.warning("Building pug files is not supported yet!")
-	return null;
+async function buildPug(bundle, context) {
+	logger.warn("Bulding pug files is not yet supported!");
 }
 
-async function build(bundle) {
-	logger.notice("Building %s...", bundle.name);
-	const files = {
-		js: null,
-		css: null,
-		html: null
-	};
-	if (bundle.entryPoints.ts) {
-		files.js = await buildTs(bundle.name, bundle.entryPoints.ts, DIST_DIR);
+async function buildJsonEsm(bundle, context) {
+	logger.warn("Bulding json files is not yet supported!");
+}
+
+async function build(bundle, context) {
+	switch (bundle.type) {
+		case "typescript":
+			await buildTypescript(bundle);
+			break;
+		case "scss":
+			await buildScss(bundle);
+			break;
+		case "pug":
+			await buildPug(bundle);
+			break;
+		case "json_build_esm":
+			await buildJsonEsm(bundle);
+			break;
+		default:
+			throw new Error(`Unexpected bundle type '${type}'`);
 	}
-	if (bundle.entryPoints.scss) {
-		files.css = await buildScss(bundle.name, bundle.entryPoints.scss, DIST_DIR);
-	}
-	if (bundle.entryPoints.pug) {
-		files.html = await buildPug(bundle.name, bundle.entryPoints.pug, DIST_DIR, files);
-	}
-	logger.notice("Finished building %s", bundle.name);
-	return files;
 }
 
-async function* iterBundles() {
-	const names = await getBundleNames();
-	for (const name of names) yield await getBundle(name);
-}
 async function preBuildCleanup() {
 	try {
 		logger.debug("Removing %s...", DIST_DIR);
@@ -127,12 +147,53 @@ async function preBuildCleanup() {
 	await fs.mkdir(DIST_DIR);
 }
 
+function createBundleBuildTasks(bundles) {
+	const context = { bundles };
 
-async function buildBundles() {
-	await preBuildCleanup();
-	for await (const bundle of iterBundles()) {
-		await build(bundle);
+	const tasks = [];
+	for (const bundle of Object.values(bundles)) {
+		tasks.push({
+			title: bundle.srcName,
+			task: () => build(bundle, context)
+		})
+	}
+	return tasks;
+}
+
+function createBuildTaskRunner(bundles) {
+	return new Listr(
+		[
+			{
+				title: "Cleanup dist directory",
+				task: () => preBuildCleanup()
+			},
+			{
+				title: "Build bundles",
+				task: (_, task) => task.newListr(
+					createBundleBuildTasks(bundles),
+					{
+						concurrent: true,
+					}
+				)
+			}
+		],
+		{
+			collectErrors: "minimal",
+		}
+	)
+}
+
+async function main() {
+	const bundles = await getBundles();
+	const runner = createBuildTaskRunner(bundles);
+	try {
+		await runner.run();
+		for (const error of runner.errors) {
+			logger.error(`${error}`);
+		}
+	} catch(e) {
+		logger.error(`Failed to build: ${e}`);
 	}
 }
 
-await buildBundles();
+await main();
