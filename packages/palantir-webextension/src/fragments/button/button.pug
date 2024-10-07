@@ -1,5 +1,5 @@
-mixin palantir-button(variant)
-  button(class="palantir-button" class=`palantir-button--${variant}`)&attributes(attributes)
+mixin palantir-button(variant, buttonAtttributes)
+  button(class="palantir-button" class=`palantir-button--${variant}`)&attributes(buttonAttributes)&attributes(attributes)
     span(
       class="palantir-button__inner"
       class={

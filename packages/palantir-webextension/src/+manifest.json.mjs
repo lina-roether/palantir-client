@@ -17,5 +17,6 @@ export default (context) => ({
 	permissions: ["tabs", "storage"],
 	content_security_policy: {
 		extension_pages: CONTENT_SECURITY_POLICY_MAP[context.environment]
-	}
+	},
+	options_page: context.include("+options.pug")
 })

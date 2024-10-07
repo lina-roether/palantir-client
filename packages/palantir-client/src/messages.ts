@@ -117,7 +117,7 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 	private ws: WebSocket;
 	private open = true;
 
-	private constructor(url: URL | string) {
+	constructor(url: URL | string) {
 		super();
 		this.ws = new WebSocket(url);
 		this.ws.addEventListener("message", (evt) => {

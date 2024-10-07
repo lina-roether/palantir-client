@@ -1,0 +1,18 @@
+extends layout.pug
+
+block append head
+  link(rel="stylesheet" href=include("+options.scss"))
+  title Palantir Settings
+
+block content
+  main(class="card options__wrapper")
+    h1(class="display-200") Settings
+
+    form(id="options_form")
+      ul(class="options__inputs")
+        li(class="options__inputs-row")
+          +palantir-text-field({ name: "server_url" })(id="server_url" class="options__input")
+          label(for="server_url" class="copy-100 no-gutter") Server URL
+      li(class="options__inputs-row")
+        +palantir-button("primary", { type: "submit" })(class="options__input") Save
+        +palantir-button("tertiary", { id: "cancel" })(class="options__input") Cancel
