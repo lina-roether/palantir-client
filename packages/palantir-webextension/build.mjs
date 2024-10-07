@@ -21,6 +21,8 @@ const VERSION = process.env.npm_package_version;
 
 const BUILD_NAME = ENVIRONMENT === "debug" ? `${TARGET}-debug` : `${TARGET}`;
 const OUTPUT_DIR = path.join(DIST_DIR, BUILD_NAME);
+const ASSETS_DIST_NAME = "assets";
+const ASSETS_OUTPUT_DIR = path.join(OUTPUT_DIR, ASSETS_DIST_NAME);
 
 if (!VERSION) {
 	logger.error("Failed to load package version");
@@ -221,8 +223,9 @@ async function copyAssets() {
 		if (e.code !== "ENOENT") logger.error(`${e}`);
 		return;
 	}
+	await fs.mkdir(ASSETS_OUTPUT_DIR)
 	logger.debug("Copying assets...");
-	await fs.cp(ASSETS_DIR, DIST_DIR, { recursive: true });
+	await fs.cp(ASSETS_DIR, ASSETS_OUTPUT_DIR, { recursive: true });
 }
 
 function createContext(bundles) {
@@ -231,10 +234,13 @@ function createContext(bundles) {
 		target: TARGET,
 		version: VERSION,
 		include(name) {
-			if (!name in bundles) {
+			if (!(name in bundles)) {
 				throw new Error(`Bundle ${name} doesn't exist!`)
 			}
 			return bundles[name].distName
+		},
+		asset(name) {
+			return path.join(ASSETS_DIST_NAME, name)
 		}
 	}
 }
