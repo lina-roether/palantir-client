@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path"
 import swc from "@swc/core";
+import * as sass from "sass";
 import pug from "pug";
 import { Listr } from "listr2";
 import log from "log";
@@ -14,6 +15,7 @@ const SRC_DIR = path.resolve("src");
 const DIST_DIR = path.resolve("dist");
 
 const ENVIRONMENT = process.env.ENVIRONMENT ?? "debug";
+const TARGET = process.env.TARGET ?? "firefox";
 
 log.notice("Building for environment %s", ENVIRONMENT);
 
@@ -95,21 +97,25 @@ async function buildTypescript(bundle, context) {
 	const output = await swc.transform(sourceCode, {
 		filename: bundle.input,
 		outputPath: bundle.output,
-		sourceMaps: ENVIRONMENT === "debug",
+		sourceMaps: context.environment === "debug",
 		isModule: true,
 		jsc: {
 			parser: {
 				syntax: "typescript"
 			},
 			transform: {},
-			minify: ENVIRONMENT === "debug" ? undefined : {}
+			minify: context.environment === "debug" ? undefined : {}
 		}
 	});
 	await fs.writeFile(bundle.output, output.code);
 }
 
 async function buildScss(bundle, context) {
-	logger.warn("Bulding scss files is not yet supported!");
+	logger.debug("Compiling bundle %s with sass", bundle.srcName);
+	const compiled = sass.compile(bundle.input, {
+		style: context.environment === "debug" ? "expanded" : "compressed"
+	});
+	await fs.writeFile(bundle.output, compiled.css);
 }
 
 async function buildPug(bundle, context) {
@@ -118,7 +124,8 @@ async function buildPug(bundle, context) {
 	logger.debug("Compiling template %s with pug", bundle.srcName);
 	const template = pug.compile(sourceCode, {
 		filename: bundle.input,
-		basedir: SRC_DIR
+		basedir: SRC_DIR,
+		compileDebug: context.environment === "debug"
 	});
 
 	const html = template(context);
@@ -160,6 +167,8 @@ async function preBuildCleanup() {
 
 function createContext(bundles) {
 	return {
+		environment: ENVIRONMENT,
+		target: TARGET,
 		include(name) {
 			if (!name in bundles) {
 				throw new Error(`Bundle ${name} doesn't exist!`)
