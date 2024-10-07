@@ -9,7 +9,9 @@ export default tseslint.config(
 		ignores: [
 			"packages/*/dist/",
 			".yarn/",
-			".pnp.*"
+			".pnp.*",
+			"**/*.js",
+			"**/*.mjs"
 		]
 	},
 	{
@@ -25,7 +27,7 @@ export default tseslint.config(
 	{
 		languageOptions: {
 			parserOptions: {
-				projectService: true,
+				projectService: true
 			}
 		},
 	},

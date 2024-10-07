@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"target": "ESNext",
 		"module": "ESNext",
-		"moduleResolution": "NodeNext",
+		"moduleResolution": "Bundler",
 		"noEmit": true,
 		"strict": true,
 		"skipLibCheck": true,
@@ -12,10 +12,6 @@
 		"checkJs": true
 	},
 	"include": [
-		"*.config.mjs",
-		"*.config.js",
 		"packages/**/*.ts",
-		"packages/*/*.config.mjs",
-		"packages/*/*.config.js"
 	],
 }
