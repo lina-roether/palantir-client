@@ -13,6 +13,7 @@ logNode();
 const logger = log.get("build");
 
 const SRC_DIR = path.resolve("src");
+const ASSETS_DIR = path.resolve("assets");
 const DIST_DIR = path.resolve("dist");
 
 const ENVIRONMENT = process.env.ENVIRONMENT ?? "debug";
@@ -180,6 +181,18 @@ async function preBuildCleanup() {
 	await fs.mkdir(DIST_DIR);
 }
 
+async function copyAssets() {
+	try {
+		const stat = await fs.stat(ASSETS_DIR);
+		if (!stat.isDirectory()) return;
+	} catch(e) {
+		if (e.code !== "ENOENT") logger.error(`${e}`);
+		return;
+	}
+	logger.debug("Copying assets...");
+	await fs.cp(ASSETS_DIR, DIST_DIR, { recursive: true });
+}
+
 function createContext(bundles) {
 	return {
 		environment: ENVIRONMENT,
@@ -221,6 +234,10 @@ function createBuildTaskRunner(bundles) {
 						concurrent: true,
 					}
 				)
+			},
+			{
+				title: "Copy assets",
+				task: () => copyAssets(),
 			}
 		],
 		{
