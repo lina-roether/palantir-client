@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import swc from "@swc/core";
+import esbuild from "esbuild";
 import * as sass from "sass";
 import pug from "pug";
 import { Listr } from "listr2";
@@ -104,35 +104,16 @@ async function getBundles() {
 }
 
 async function buildTypescript(bundle, context) {
-	const sourceCode = await fs.readFile(bundle.input, { encoding: "utf-8" });
 	logger.debug("Compiling bundle %s with swc", bundle.srcName);
-	const output = await swc.transform(sourceCode, {
-		filename: bundle.input,
-		outputPath: bundle.output,
-		sourceMaps: context.environment === "debug",
-		isModule: true,
-		jsc: {
-			parser: {
-				syntax: "typescript"
-			},
-			transform: {},
-			minify: context.environment === "debug" ? undefined : {
-				compress: true,
-				mangle: true
-			}
-		}
-	});
-	let javascriptContent = output.code;
 
-	if (output.map) {
-		logger.debug("Found source maps for %s", bundle.distName);
-		const sourceMapName = `${bundle.distName}.map`;
-		const sourceMapOutput = path.join(OUTPUT_DIR, sourceMapName);
-		javascriptContent += `\n//# sourceMappingURL=${sourceMapName}`;
-		await fs.writeFile(sourceMapOutput, output.map);
-	}
-
-	await fs.writeFile(bundle.output, javascriptContent);
+	await esbuild.build({
+		entryPoints: [bundle.input],
+		outfile: bundle.output,
+		bundle: true,
+		sourcemap: context.environment === "debug",
+		format: "iife",
+		minify: context.environment === "prod",
+	})
 }
 
 async function buildScss(bundle, context) {
