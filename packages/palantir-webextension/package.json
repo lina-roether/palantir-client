@@ -4,7 +4,13 @@
 	"version": "0.1.0",
 	"packageManager": "yarn@4.5.0",
 	"scripts": {
-		"build": "node build.mjs"
+		"clean": "rm -r dist",
+		"build:firefox-debug": "ENVIRONMENT=debug TARGET=firefox node build.mjs",
+		"build:firefox": "ENVIRONMENT=prod TARGET=firefox node build.mjs",
+		"build:chromium-debug": "ENVIRONMENT=debug TARGET=chromium node build.mjs",
+		"build:chromium": "ENVIRONMENT=prod TARGET=chromium node build.mjs",
+		"build": "yarn clean && yarn build:firefox-debug && yarn build:chromium-debug",
+		"build:prod": "yarn clean && yarn build:firefox && yarn build:chromium"
 	},
 	"dependencies": {
 		"log": "^6.3.2",

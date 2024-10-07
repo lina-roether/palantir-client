@@ -19,12 +19,15 @@ const ENVIRONMENT = process.env.ENVIRONMENT ?? "debug";
 const TARGET = process.env.TARGET ?? "firefox";
 const VERSION = process.env.npm_package_version;
 
+const BUILD_NAME = ENVIRONMENT === "debug" ? `${TARGET}-debug` : `${TARGET}`;
+const OUTPUT_DIR = path.join(DIST_DIR, BUILD_NAME);
+
 if (!VERSION) {
 	logger.error("Failed to load package version");
 	process.exit(1);
 }
 
-log.notice("Building version %d for environment %s", VERSION, ENVIRONMENT);
+log.notice("Building version %s of %s", VERSION, BUILD_NAME);
 
 const ENTRY_POINT_MATCHER = /^\+([^.]+).(.+)$/;
 const ENTRY_POINT_TYPES = {
@@ -62,7 +65,7 @@ function getBundle(entry) {
 	const type = ENTRY_POINT_TYPES[extension];
 	const input = path.join(entry.parentPath, entry.name);
 	const distName = getBundleDistName(name, type);
-	const output = path.join(DIST_DIR, distName);
+	const output = path.join(OUTPUT_DIR, distName);
 	logger.debug("Found bundle of type %s at %s that will output to %s", type, input, output);
 	return {
 		srcName: entry.name,
@@ -179,11 +182,11 @@ async function build(bundle, context) {
 
 async function preBuildCleanup() {
 	try {
-		logger.debug("Removing %s...", DIST_DIR);
-		await fs.rm(DIST_DIR, { recursive: true });
+		logger.debug("Removing %s...", OUTPUT_DIR);
+		await fs.rm(OUTPUT_DIR, { recursive: true });
 	} catch (e) { }
-	logger.debug("Creating %s...", DIST_DIR);
-	await fs.mkdir(DIST_DIR);
+	logger.debug("Creating %s...", OUTPUT_DIR);
+	await fs.mkdir(OUTPUT_DIR, { recursive: true });
 }
 
 async function copyAssets() {
