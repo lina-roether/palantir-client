@@ -3,7 +3,9 @@ include fragments/fragments.pug
 doctype html
 html
   head
-    block links
+    block head
+      if target != "firefox"
+        script(src=include("+webextension-polyfill.ts"))
       link(rel="stylesheet" href=include("+common.scss"))
   body
     block content
