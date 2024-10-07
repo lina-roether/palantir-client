@@ -1,0 +1,9 @@
+include fragments/fragments.pug
+
+doctype html
+html
+  head
+    block links
+      link(rel="stylesheet" href=include("+common.scss"))
+  body
+    block content

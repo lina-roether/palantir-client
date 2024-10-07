@@ -1,0 +1,76 @@
+@use "base_variables";
+@use "theme_variables";
+
+body {
+  background-color: var(--theme-color-background-100);
+  color: var(--theme-color-text-background);
+  font: var(--theme-font-copy-100);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.copy-100 {
+  display: block;
+  font: var(--theme-font-copy-100);
+  margin-bottom: var(--theme-font-copy-gutter);
+}
+
+.copy-75 {
+  display: block;
+  font: var(--theme-font-copy-75);
+  margin-bottom: var(--theme-font-copy-gutter);
+}
+
+.action-100 {
+  display: inline;
+  font: var(--theme-font-action-100);
+}
+
+.action-75 {
+  display: inline;
+  font: var(--theme-font-action-75);
+}
+
+.heading-100 {
+  display: block;
+  font: var(--theme-font-heading-100);
+  margin-bottom: var(--theme-font-heading-gutter);
+}
+
+.heading-200 {
+  display: block;
+  font: var(--theme-font-heading-200);
+  margin-bottom: var(--theme-font-heading-gutter);
+}
+
+.heading-300 {
+  display: block;
+  font: var(--theme-font-heading-300);
+  margin-bottom: var(--theme-font-heading-gutter);
+}
+
+.display-100 {
+  display: block;
+  font: var(--theme-font-display-100);
+  margin-bottom: var(--theme-font-display-gutter);
+}
+
+.display-200 {
+  display: block;
+  font: var(--theme-font-display-200);
+  margin-bottom: var(--theme-font-display-gutter);
+}
+
+.no-gutter {
+  margin-bottom: 0;
+}
+
+.card {
+  display: inline-block;
+  background-color: var(--theme-color-background-200);
+  padding: var(--theme-spacing-100);
+}

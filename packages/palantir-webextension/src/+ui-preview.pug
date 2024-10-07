@@ -1,0 +1,46 @@
+extends layout.pug
+
+block append links
+  link(rel="stylesheet" href=include("+ui-preview.scss"))
+
+block content
+  main
+    h1(class="display-200") UI Preview
+
+    section(class="card")
+      h2(class="heading-200") Typography
+      div(class="columns")
+        div
+          span(class="display-200") Display 200
+          span(class="display-100") Display 100
+          span(class="heading-300") Heading 300
+          span(class="heading-200") Heading 200
+          span(class="heading-100") Heading 100
+          span(class="copy-100") Copy 100
+          span(class="copy-75") Copy 75
+          span(class="action-100") Action 100
+          span(class="action-75") Action 75
+        div
+          span(class="display-100") Lorem Ipsum
+          span(class="heading-300") Lorem Ipsum dolor
+          span(class="copy-100")
+            | Minima cupiditate ut qui fugit assumenda itaque nesciunt pariatur. Tenetur vero tenetur
+            | cum voluptatem maiores. Nostrum sed ut vel fugit iste sunt quia. Id dolores ut ab
+            | aliquid dolorem error quia.
+          span(class="heading-200") Lorem Ipsum dolor
+          span(class="copy-100")
+            | Minima cupiditate ut qui fugit assumenda itaque nesciunt pariatur. Tenetur vero tenetur
+            | cum voluptatem maiores. Nostrum sed ut vel fugit iste sunt quia. Id dolores ut ab
+            | aliquid dolorem error quia.
+    
+    section(class="card")
+      h2(class="heading-200") Buttons
+      div(class="row")
+        +palantir-button("primary") Primary Button
+        +palantir-button("secondary") Secondary Button
+        +palantir-button("tertiary") Tertiary Button
+
+    section(class="card")
+      h2(class="heading-200") Inputs
+      div(class="row")
+        +palantir-text-field()(value="Text Field")
