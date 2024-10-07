@@ -114,18 +114,42 @@ async function buildTypescript(bundle, context) {
 				syntax: "typescript"
 			},
 			transform: {},
-			minify: context.environment === "debug" ? undefined : {}
+			minify: context.environment === "debug" ? undefined : {
+				compress: true,
+				mangle: true
+			}
 		}
 	});
-	await fs.writeFile(bundle.output, output.code);
+	let javascriptContent = output.code;
+
+	if (output.map) {
+		logger.debug("Found source maps for %s", bundle.distName);
+		const sourceMapName = `${bundle.distName}.map`;
+		const sourceMapOutput = path.join(OUTPUT_DIR, sourceMapName);
+		javascriptContent += `\n//# sourceMappingURL=${sourceMapName}`;
+		await fs.writeFile(sourceMapOutput, output.map);
+	}
+
+	await fs.writeFile(bundle.output, javascriptContent);
 }
 
 async function buildScss(bundle, context) {
 	logger.debug("Compiling bundle %s with sass", bundle.srcName);
 	const compiled = sass.compile(bundle.input, {
-		style: context.environment === "debug" ? "expanded" : "compressed"
+		style: context.environment === "debug" ? "expanded" : "compressed",
+		sourceMap: context.environment === "debug"
 	});
-	await fs.writeFile(bundle.output, compiled.css);
+	let cssContent = compiled.css;
+
+	if (compiled.sourceMap) {
+		logger.debug("Found source maps for %s", bundle.distName);
+		const sourceMapName = `${bundle.distName}.map`;
+		const sourceMapOutput = path.join(OUTPUT_DIR, sourceMapName);
+		cssContent += `\n/*# sourceMappingURL=${sourceMapName}*/`;
+		await fs.writeFile(sourceMapOutput, JSON.stringify(compiled.sourceMap));
+	}
+
+	await fs.writeFile(bundle.output, cssContent);
 }
 
 async function buildPug(bundle, context) {
