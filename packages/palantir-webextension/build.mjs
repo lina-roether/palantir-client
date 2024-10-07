@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
-import path from "node:path"
+import path from "node:path";
+import vm from "node:vm";
 import swc from "@swc/core";
 import * as sass from "sass";
 import pug from "pug";
@@ -134,7 +135,21 @@ async function buildPug(bundle, context) {
 }
 
 async function buildJsonEsm(bundle, context) {
-	logger.warn("Bulding json files is not yet supported!");
+	logger.debug("Evaluating json generator %s", bundle.srcName);
+	const mod = await import(bundle.input);	
+	let value;
+	switch (typeof mod.default) {
+		case "function":
+			value = mod.default(context);
+			break;
+		case "object":
+			value = mod.default;
+			break;
+		default:
+			throw new Error(`Expected either object or function as default export from json builder module, but got ${typeof valueOrBuilder}`);
+	}
+	const json = JSON.stringify(value, null, context.environment === "debug" ? 3 : null);
+	await fs.writeFile(bundle.output, json);
 }
 
 async function build(bundle, context) {
