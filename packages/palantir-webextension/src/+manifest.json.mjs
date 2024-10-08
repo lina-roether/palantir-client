@@ -1,3 +1,5 @@
+const EXTENSION_ID = "{cbaa7c2d-7a63-4d10-bcca-1de052432aa0}";
+
 const NAME_MAP = {
 	"prod": "Palantir",
 	"debug": "Palantir (DEBUG)"
@@ -8,6 +10,14 @@ const CONTENT_SECURITY_POLICY_MAP = {
 	"debug": "default-src 'self';"
 }
 
+const BROWSER_SPECIFIC_SETTINGS_MAP = {
+	"firefox": {
+		gecko: {
+			id: EXTENSION_ID
+		}
+	},
+	"chromium": undefined
+}
 
 export default (context) => ({
 	manifest_version: 3,
@@ -18,5 +28,6 @@ export default (context) => ({
 	content_security_policy: {
 		extension_pages: CONTENT_SECURITY_POLICY_MAP[context.environment]
 	},
+	browser_specific_settings: BROWSER_SPECIFIC_SETTINGS_MAP[context.target],
 	options_page: context.include("+options.pug")
 })
