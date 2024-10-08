@@ -11,8 +11,10 @@ block content
     form(id="options_form")
       ul(class="options__inputs")
         li(class="options__inputs-row")
-          +palantir-text-field({ name: "server_url" })(id="server_url" class="options__input")
+          +palantir-text-field({ name: "server_url", id: "server_url" })(class="options__input")
           label(for="server_url" class="copy-100 no-gutter") Server URL
       li(class="options__inputs-row")
-        +palantir-button("primary", { type: "submit" })(class="options__input") Save
-        +palantir-button("tertiary", { id: "cancel" })(class="options__input") Cancel
+        +palantir-button("primary")(type="submit" class="options__input") Save
+        +palantir-button("tertiary")(id="cancel" class="options__input") Cancel
+  
+  script(src=include("+options.ts"))
