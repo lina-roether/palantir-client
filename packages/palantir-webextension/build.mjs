@@ -14,6 +14,7 @@ const logger = log.get("build");
 const SRC_DIR = path.resolve("src");
 const ASSETS_DIR = path.resolve("assets");
 const DIST_DIR = path.resolve("dist");
+const BUILD_CONFIG_FILE = path.resolve("+build_config.mjs");
 
 const ENVIRONMENT = process.env.ENVIRONMENT ?? "debug";
 const TARGET = process.env.TARGET ?? "firefox";
@@ -52,6 +53,30 @@ function getBundleDistName(name, type) {
 		default:
 			throw new Error(`Unexpected bundle type '${type}'`);
 	}
+}
+
+async function getBuildConfig(context) {
+	try {
+		await fs.stat(BUILD_CONFIG_FILE);
+	} catch (e) {
+		if (e.code !== "ENOENT") logger.error(`Failed to access build config: ${e}`);
+		return {};
+	}
+	logger.debug("Reading build config from %s", BUILD_CONFIG_FILE);
+	const mod = await import(BUILD_CONFIG_FILE);
+	let value;
+	switch (typeof mod.default) {
+		case "function":
+			value = mod.default(context);
+			break;
+		case "object":
+			value = mod.default;
+			break;
+		default:
+			throw new Error(`Expected either object or function as default export from build config, but got ${typeof mod}`);
+	}
+	logger.debug("Build config is %O", value);
+	return value;
 }
 
 function getBundle(entry) {
@@ -162,13 +187,18 @@ async function buildJsonEsm(bundle, context) {
 			value = mod.default;
 			break;
 		default:
-			throw new Error(`Expected either object or function as default export from json builder module, but got ${typeof valueOrBuilder}`);
+			throw new Error(`Expected either object or function as default export from json builder module, but got ${typeof mod}`);
 	}
 	const json = JSON.stringify(value, null, context.environment === "debug" ? 3 : null);
 	await fs.writeFile(bundle.output, json);
 }
 
-async function build(bundle, context) {
+async function build(bundle, context, config) {
+	const exclude = config.exclude ?? [];
+	if (exclude.includes(bundle.srcName)) {
+		logger.notice("%s is excluded for this build", bundle.srcName);
+		return;
+	}
 	switch (bundle.type) {
 		case "typescript":
 			await buildTypescript(bundle, context);
@@ -226,20 +256,23 @@ function createContext(bundles) {
 	}
 }
 
-function createBundleBuildTasks(bundles) {
+async function createBundleBuildTasks(bundles) {
 	const context = createContext(bundles);
+	const config = await getBuildConfig(context);
 
 	const tasks = [];
 	for (const bundle of Object.values(bundles)) {
 		tasks.push({
 			title: bundle.srcName,
-			task: () => build(bundle, context)
+			task: () => build(bundle, context, config)
 		})
 	}
 	return tasks;
 }
 
-function createBuildTaskRunner(bundles) {
+async function createBuildTaskRunner(bundles) {
+	const buildTasks = await createBundleBuildTasks(bundles);
+
 	return new Listr(
 		[
 			{
@@ -249,7 +282,7 @@ function createBuildTaskRunner(bundles) {
 			{
 				title: "Build bundles",
 				task: (_, task) => task.newListr(
-					createBundleBuildTasks(bundles),
+					buildTasks,
 					{
 						concurrent: true,
 					}
@@ -268,7 +301,7 @@ function createBuildTaskRunner(bundles) {
 
 async function main() {
 	const bundles = await getBundles();
-	const runner = createBuildTaskRunner(bundles);
+	const runner = await createBuildTaskRunner(bundles);
 	try {
 		await runner.run();
 		for (const error of runner.errors) {
