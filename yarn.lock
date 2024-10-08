@@ -376,6 +376,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/firefox-webext-browser@npm:^120.0.4":
+  version: 120.0.4
+  resolution: "@types/firefox-webext-browser@npm:120.0.4"
+  checksum: 10c0/75982a9c2dfdec8808a5a2356ff11e221d7891aebdb8e5c74cfcf6ac2ccd260dfd4b6b79ec99c214e17d1e6b1a6ff391a8dd0b569ba822c22246b4e6b5aaea34
+  languageName: node
+  linkType: hard
+
 "@types/json-schema@npm:*, @types/json-schema@npm:^7.0.15":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
@@ -394,13 +401,6 @@ __metadata:
   version: 2.0.10
   resolution: "@types/pug@npm:2.0.10"
   checksum: 10c0/6fac37fd84ad4bcf755061caad274db70591699739070bc30c5c1b5f0aecf98646dc29ec8da11cfca82a2b7cc57d949a3ae50aba2f88bf098751ebdd25d9aaea
-  languageName: node
-  linkType: hard
-
-"@types/webextension-polyfill@npm:^0.12.1":
-  version: 0.12.1
-  resolution: "@types/webextension-polyfill@npm:0.12.1"
-  checksum: 10c0/d6e6253bbd020dcfa40391112212e3486320760d12c58854d0410140bda7ad0476749b9476e18d6888a1b04092662715b488f470c3aa29b44768990ffaf6d194
   languageName: node
   linkType: hard
 
@@ -1804,6 +1804,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.12.0"
     "@types/eslint__js": "npm:^8.42.3"
+    "@types/firefox-webext-browser": "npm:^120.0.4"
     eslint: "npm:^9.12.0"
     eslint-config-prettier: "npm:^9.1.0"
     prettier: "npm:^3.3.3"
@@ -1829,9 +1830,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "palantir-webextension@workspace:packages/palantir-webextension"
   dependencies:
+    "@types/firefox-webext-browser": "npm:^120.0.4"
     "@types/log": "npm:^6.3.3"
     "@types/pug": "npm:^2.0.10"
-    "@types/webextension-polyfill": "npm:^0.12.1"
     esbuild: "npm:^0.24.0"
     listr2: "npm:^8.2.5"
     log: "npm:^6.3.2"
@@ -1840,6 +1841,7 @@ __metadata:
     sass: "npm:^1.79.4"
     tslib: "npm:^2.7.0"
     webextension-polyfill: "npm:^0.12.0"
+    zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
 

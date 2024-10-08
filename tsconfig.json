@@ -9,7 +9,10 @@
 		"skipLibCheck": true,
 		"allowSyntheticDefaultImports": true,
 		"esModuleInterop": true,
-		"checkJs": true
+		"checkJs": true,
+		"types": [
+			"@types/firefox-webext-browser"
+		]
 	},
 	"include": [
 		"packages/**/*.ts",
