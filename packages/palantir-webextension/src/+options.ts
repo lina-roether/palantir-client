@@ -1,19 +1,10 @@
 import log from "log";
 import { getConfig, setConfig } from "./config";
+import { assertTypedElement } from "./utils";
 
-function assertElement<T extends HTMLElement>(id: string, runtimeType: new () => T): T {
-	const elem = document.getElementById(id);
-	if (!(elem instanceof runtimeType)) {
-		throw new Error(`Missing element '${id}'`);
-	}
-	return elem;
-}
-
-const form = assertElement("options_form", HTMLFormElement);
-
-const cancelButton = assertElement("cancel", HTMLButtonElement);
-
-const serverUrlInput = assertElement("server_url", HTMLInputElement);
+const form = assertTypedElement("#options_form", HTMLFormElement);
+const cancelButton = assertTypedElement("#cancel", HTMLButtonElement);
+const serverUrlInput = assertTypedElement("#server_url", HTMLInputElement);
 
 function reset() {
 	getConfig().then((config) => {
