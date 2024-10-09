@@ -1,19 +1,12 @@
 :root {
   // Colors
-  --theme-color-background-100: var(--base-color-black-100);
-  --theme-color-background-200: var(--base-color-black-200);
-  --theme-color-primary-100: var(--base-color-red-100);
-  --theme-color-primary-200: var(--base-color-red-200);
-  --theme-color-secondary-100: var(--base-color-ash-100);
-  --theme-color-secondary-200: var(--base-color-ash-200);
-  --theme-color-accent-active-100: var(--base-color-orange-100);
-  --theme-color-accent-active-200: var(--base-color-orange-200);
-  --theme-color-detail-100: var(--base-color-purple-100);
-  --theme-color-detail-200: var(--base-color-purple-200);
-  --theme-color-accent-inactive-100: var(--base-color-orange-10);
-  --theme-color-text-background: var(--base-color-white-100);
-  --theme-color-text-primary: var(--base-color-black-100);
-  --theme-color-text-secondary: var(--base-color-black-100);
+  --theme-color-background-100: var(--base-color-char-100);
+  --theme-color-background-200: var(--base-color-ash-100);
+  --theme-color-primary-100: var(--base-color-flame-100);
+  --theme-color-primary-200: var(--base-color-flame-200);
+  --theme-color-text-background: var(--base-color-sulfur-100);
+  --theme-color-text-primary: var(--base-color-sulfur-100);
+  --theme-color-text-secondary: var(--base-color-sulfur-100);
 
   // Fonts
   --theme-font-display-100: 2.625rem/1.5 var(--base-font-family-fraktur);
@@ -45,6 +38,6 @@
   --theme-border-radius-100: 10px;
 
   // Shadow
-  --theme-shadow-100: 0 0 5px var(--base-color-shadow-black-100);
-  --theme-fire-100: 0 0 5px var(--base-color-shadow-orange-100);
+  --theme-shadow-100: 0 0 5px var(--base-color-shadow-char-100);
+  --theme-fire-100: 0 0 5px var(--base-color-shadow-flame-100);
 }
