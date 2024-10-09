@@ -18,7 +18,6 @@
     height: calc(var(--theme-spacing-200) + var(--theme-spacing-100));
     border-radius: 100%;
     background-color: var(--theme-color-background-100);
-    color: var(--theme-color-accent-active-100);
     text-align: center;
     position: absolute;
     top: 0;
@@ -27,11 +26,27 @@
     display: flex;
     align-items: center;
     justify-content: center;
+
+    &__image {
+      width: 40px;
+      height: 40px;
+    }
   }
 
   &__header {
-    text-align: center;
     margin-top: var(--theme-spacing-100);
     margin-bottom: var(--theme-spacing-200);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--theme-spacing-100);
+
+    &__ornament {
+      width: 64px;
+
+      &--right {
+        transform: scale(-1, 1);
+      }
+    }
   }
 }

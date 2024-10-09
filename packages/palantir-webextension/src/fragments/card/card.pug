@@ -3,21 +3,24 @@ mixin palantir-card(heading, level)
     div(class="palantir-card__content")
       if heading
         div(class="palantir-card__header")
+          img(class="palantir-card__header__ornament" width="64" height="48" role="presentation" src=asset("images/ornament.svg"))
           case level
             when 1
-              h1(class="display-100") #{heading}
+              h1(class="display-100 no-gutter") #{heading}
             when 2
-              h2(class="display-100") #{heading}
+              h2(class="display-100 no-gutter") #{heading}
             when 3
-              h3(class="display-100") #{heading}
+              h3(class="display-100 no-gutter") #{heading}
             when 4
-              h4(class="display-100") #{heading}
+              h4(class="display-100 no-gutter") #{heading}
             when 5
-              h5(class="display-100") #{heading}
+              h5(class="display-100 no-gutter") #{heading}
             when 6
-              h6(class="display-100") #{heading}
+              h6(class="display-100 no-gutter") #{heading}
             default
-              h1(class="display-100") #{heading}
+              h1(class="display-100 no-gutter") #{heading}
+          img(class="palantir-card__header__ornament palantir-card__header__ornament--right" width="64" height="48" role="presentation" src=asset("images/ornament.svg"))
       block
     |
-    div(class="palantir-card__eye") OwO
+    div(class="palantir-card__eye")
+      img(class="palantir-card__eye__image" width="48" height="48" role="presentation" src=asset("images/eye.svg"))
