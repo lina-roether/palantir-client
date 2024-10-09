@@ -24,6 +24,10 @@ export default (context) => ({
 	name: NAME_MAP[context.environment],
 	version: context.version,
 	description: "A browser extension to watch videos together remotely on any website",
+	icons: {
+		"48": context.asset("images/icon-48.png"),
+		"96": context.asset("images/icon-96.png")
+	},
 	permissions: ["tabs", "storage"],
 	content_security_policy: {
 		extension_pages: CONTENT_SECURITY_POLICY_MAP[context.environment]
