@@ -263,7 +263,6 @@ function createGlobalContext(bundles) {
 			if (!(name in bundles)) {
 				throw new Error(`Bundle ${name} doesn't exist!`)
 			}
-			console.log(name, bundles[name]);
 			return `/${bundles[name].distName}`;
 		},
 	}
