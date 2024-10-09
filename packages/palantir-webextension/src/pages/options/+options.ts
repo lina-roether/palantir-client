@@ -1,6 +1,6 @@
 import log from "log";
-import { getConfig, setConfig } from "./config";
-import { assertTypedElement } from "./utils";
+import { getConfig, setConfig } from "../../config";
+import { assertTypedElement } from "../../utils";
 
 const form = assertTypedElement("#options_form", HTMLFormElement);
 const cancelButton = assertTypedElement("#cancel", HTMLButtonElement);

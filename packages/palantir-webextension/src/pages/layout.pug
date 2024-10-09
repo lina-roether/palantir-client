@@ -1,4 +1,4 @@
-include fragments/fragments.pug
+include ../fragments/fragments.pug
 
 doctype html
 html
@@ -6,6 +6,6 @@ html
     block head
       if target != "firefox"
         script(src=include("+webextension-polyfill.ts"))
-      link(rel="stylesheet" href=include("+common.scss"))
+      link(rel="stylesheet" href=include("pages/+common.scss"))
   body
     block content

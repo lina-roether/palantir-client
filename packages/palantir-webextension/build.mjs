@@ -40,7 +40,7 @@ const ENTRY_POINT_TYPES = {
 	"json.mjs": "json_build_esm"
 }
 
-function getBundleDistName(name, type) {
+function getBundleFileName(name, type) {
 	switch (type) {
 		case "typescript":
 			return `${name}.js`
@@ -55,7 +55,7 @@ function getBundleDistName(name, type) {
 	}
 }
 
-async function getBuildConfig(context) {
+async function getBuildConfig(globalContext) {
 	try {
 		await fs.stat(BUILD_CONFIG_FILE);
 	} catch (e) {
@@ -67,7 +67,7 @@ async function getBuildConfig(context) {
 	let value;
 	switch (typeof mod.default) {
 		case "function":
-			value = mod.default(context);
+			value = mod.default(globalContext);
 			break;
 		case "object":
 			value = mod.default;
@@ -79,7 +79,7 @@ async function getBuildConfig(context) {
 	return value;
 }
 
-function getBundle(entry) {
+function getBundle(entry, baseDir) {
 	if (!entry.isFile()) return null;
 
 	const result = ENTRY_POINT_MATCHER.exec(entry.name);
@@ -91,11 +91,12 @@ function getBundle(entry) {
 
 	const type = ENTRY_POINT_TYPES[extension];
 	const input = path.join(entry.parentPath, entry.name);
-	const distName = getBundleDistName(name, type);
+	const distName = path.join(baseDir, getBundleFileName(name, type));
+	const srcName = path.join(baseDir, entry.name);
 	const output = path.join(OUTPUT_DIR, distName);
 	logger.debug("Found bundle of type %s at %s that will output to %s", type, input, output);
 	return {
-		srcName: entry.name,
+		srcName,
 		distName,
 		input,
 		output,
@@ -103,13 +104,15 @@ function getBundle(entry) {
 	};
 }
 
-async function getBundles() {
-	const distFiles = {};
-	const bundles = {};
-	logger.debug(`Searching %s for bundles...`, SRC_DIR)
-	const srcDir = await fs.opendir(SRC_DIR);
+async function getBundlesRecursive(bundles, distFiles, baseDir) {
+	logger.debug(`Searching %s for bundles...`, baseDir)
+	const srcDir = await fs.opendir(path.join(SRC_DIR, baseDir));
 	for await (const entry of srcDir) {
-		const bundle = getBundle(entry);
+		if (entry.isDirectory()) {
+			await getBundlesRecursive(bundles, distFiles, path.join(baseDir, entry.name));
+		}
+
+		const bundle = getBundle(entry, baseDir);
 		if (!bundle) continue;
 
 		if (bundle.distName in distFiles) {
@@ -123,8 +126,14 @@ async function getBundles() {
 			continue;
 		}
 		distFiles[bundle.distName] = bundle;
-		bundles[entry.name] = bundle;
+		bundles[bundle.srcName] = bundle;
 	}
+}
+
+async function getBundles() {
+	const distFiles = {};
+	const bundles = {};
+	await getBundlesRecursive(bundles, distFiles, "")
 	return bundles;
 }
 
@@ -193,12 +202,14 @@ async function buildJsonEsm(bundle, context) {
 	await fs.writeFile(bundle.output, json);
 }
 
-async function build(bundle, context, config) {
+async function build(bundle, globalContext, config) {
 	const exclude = config.exclude ?? [];
 	if (exclude.includes(bundle.srcName)) {
 		logger.notice("%s is excluded for this build", bundle.srcName);
 		return;
 	}
+	const context = createBundleContext(globalContext, bundle);
+	await fs.mkdir(path.dirname(bundle.output), { recursive: true });
 	switch (bundle.type) {
 		case "typescript":
 			await buildTypescript(bundle, context);
@@ -239,32 +250,40 @@ async function copyAssets() {
 	await fs.cp(ASSETS_DIR, ASSETS_OUTPUT_DIR, { recursive: true });
 }
 
-function createContext(bundles) {
+function createGlobalContext(bundles) {
 	return {
 		environment: ENVIRONMENT,
 		target: TARGET,
 		version: VERSION,
+		bundles,
+		asset(name) {
+			return `/${path.join(ASSETS_DIST_NAME, name)}`;
+		},
 		include(name) {
 			if (!(name in bundles)) {
 				throw new Error(`Bundle ${name} doesn't exist!`)
 			}
-			return bundles[name].distName
+			console.log(name, bundles[name]);
+			return `/${bundles[name].distName}`;
 		},
-		asset(name) {
-			return path.join(ASSETS_DIST_NAME, name)
-		}
+	}
+}
+
+function createBundleContext(globalContext, _bundle) {
+	return {
+		...globalContext,
 	}
 }
 
 async function createBundleBuildTasks(bundles) {
-	const context = createContext(bundles);
-	const config = await getBuildConfig(context);
+	const globalContext = createGlobalContext(bundles);
+	const config = await getBuildConfig(globalContext);
 
 	const tasks = [];
 	for (const bundle of Object.values(bundles)) {
 		tasks.push({
 			title: bundle.srcName,
-			task: () => build(bundle, context, config)
+			task: () => build(bundle, globalContext, config)
 		})
 	}
 	return tasks;

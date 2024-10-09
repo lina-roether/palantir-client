@@ -1,7 +1,7 @@
-extends layout.pug
+extends ../layout.pug
 
 block append head
-  link(rel="stylesheet" href=include("+options.scss"))
+  link(rel="stylesheet" href=include("pages/options/+styles.scss"))
   title Palantir Settings
 
 block content
@@ -15,4 +15,4 @@ block content
         +palantir-button("primary")(type="submit" class="options__input") Save
         +palantir-button("tertiary")(id="cancel" class="options__input") Cancel
   
-  script(src=include("+options.ts"))
+  script(src=include("pages/options/+options.ts"))

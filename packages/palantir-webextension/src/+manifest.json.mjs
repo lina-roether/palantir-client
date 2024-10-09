@@ -29,5 +29,5 @@ export default (context) => ({
 		extension_pages: CONTENT_SECURITY_POLICY_MAP[context.environment]
 	},
 	browser_specific_settings: BROWSER_SPECIFIC_SETTINGS_MAP[context.target],
-	options_page: context.include("+options.pug")
+	options_page: context.include("pages/options/+index.pug")
 })
