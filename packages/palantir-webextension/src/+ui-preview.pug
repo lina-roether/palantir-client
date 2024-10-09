@@ -8,8 +8,7 @@ block content
   main
     h1(class="display-200") UI Preview
 
-    section(class="card")
-      h2(class="heading-200") Typography
+    +palantir-card("Typography", 2)
       div(class="columns")
         div
           span(class="display-200") Display 200
@@ -34,14 +33,12 @@ block content
             | cum voluptatem maiores. Nostrum sed ut vel fugit iste sunt quia. Id dolores ut ab
             | aliquid dolorem error quia.
     
-    section(class="card")
-      h2(class="heading-200") Buttons
+    +palantir-card("Buttons", 2)
       div(class="row")
         +palantir-button("primary") Primary Button
         +palantir-button("secondary") Secondary Button
         +palantir-button("tertiary") Tertiary Button
 
-    section(class="card")
-      h2(class="heading-200") Inputs
+    +palantir-card("Inputs", 2)
       div(class="row")
         +palantir-text-field()(value="Text Field")

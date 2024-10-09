@@ -5,9 +5,7 @@ block append head
   title Palantir Settings
 
 block content
-  main(class="card options__wrapper")
-    h1(class="display-200") Settings
-
+  +palantir-card("Settings")(class="options__wrapper")
     form(id="options_form")
       ul(class="options__inputs")
         li(class="options__inputs-row")

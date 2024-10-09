@@ -2,7 +2,7 @@
 @use "theme_variables";
 
 body {
-  background-color: var(--theme-color-background-100);
+  background-color: var(--theme-color-background-200);
   color: var(--theme-color-text-background);
   font: var(--theme-font-copy-100);
 }
@@ -67,10 +67,4 @@ body {
 
 .no-gutter {
   margin-bottom: 0;
-}
-
-.card {
-  display: inline-block;
-  background-color: var(--theme-color-background-200);
-  padding: var(--theme-spacing-100);
 }

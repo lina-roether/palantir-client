@@ -31,18 +31,18 @@
   --theme-font-copy-gutter: var(--theme-spacing-150);
 
   // Spacing
-  --theme-spacing-25: 0.25rem;
-  --theme-spacing-50: 0.5rem;
-  --theme-spacing-100: 1rem;
-  --theme-spacing-150: 1.5rem;
-  --theme-spacing-200: 2rem;
-  --theme-spacing-300: 3rem;
+  --theme-spacing-25: 4px;
+  --theme-spacing-50: 8px;
+  --theme-spacing-100: 16px;
+  --theme-spacing-150: 24px;
+  --theme-spacing-200: 32px;
+  --theme-spacing-300: 48px;
 
   // Borders
-  --theme-border-width-50: 4px;
-  --theme-border-width-100: 8px;
-  --theme-border-radius-50: 4.1px;
-  --theme-border-radius-100: 8px;
+  --theme-border-width-50: 1px;
+  --theme-border-width-100: 2px;
+  --theme-border-radius-50: 5px;
+  --theme-border-radius-100: 10px;
 
   // Shadow
   --theme-shadow-100: 0 0 5px var(--base-color-shadow-black-100);

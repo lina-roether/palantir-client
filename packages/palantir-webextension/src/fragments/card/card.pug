@@ -1,0 +1,23 @@
+mixin palantir-card(heading, level)
+  section(class="palantir-card")&attributes(attributes)
+    div(class="palantir-card__content")
+      if heading
+        div(class="palantir-card__header")
+          case level
+            when 1
+              h1(class="display-100") #{heading}
+            when 2
+              h2(class="display-100") #{heading}
+            when 3
+              h3(class="display-100") #{heading}
+            when 4
+              h4(class="display-100") #{heading}
+            when 5
+              h5(class="display-100") #{heading}
+            when 6
+              h6(class="display-100") #{heading}
+            default
+              h1(class="display-100") #{heading}
+      block
+    |
+    div(class="palantir-card__eye") OwO
