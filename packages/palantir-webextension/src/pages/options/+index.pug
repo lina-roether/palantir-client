@@ -14,5 +14,6 @@ block content
       li(class="options__inputs-row")
         +palantir-button("primary")(type="submit" class="options__input") Save
         +palantir-button("secondary")(id="cancel" class="options__input") Cancel
-  
+
+block append scripts
   script(src=include("pages/options/+options.ts"))
