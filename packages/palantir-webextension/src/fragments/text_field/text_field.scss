@@ -1,3 +1,5 @@
+@use "../../styles/utils";
+
 .palantir-text-field {
   display: inline-block;
   font: var(--theme-font-copy-100);
@@ -6,4 +8,13 @@
   border: none;
   padding: var(--theme-spacing-50);
   border-bottom: var(--theme-color-text-100) var(--theme-border-width-100) dashed;
+  border-top-left-radius: var(--theme-border-radius-100);
+  border-top-right-radius: var(--theme-border-radius-100);
+  transition: background-color var(--base-duration-50) linear, box-shadow var(--base-duration-100) ease-in-out;
+
+  &:focus {
+    outline: none;
+    background-color: var(--theme-color-background-200);
+    box-shadow: var(--theme-shadow-100);
+  }
 }

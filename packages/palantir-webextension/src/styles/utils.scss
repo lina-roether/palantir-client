@@ -1,0 +1,23 @@
+@mixin focus-outline {
+  position: relative;
+  isolation: isolate;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    &::after {
+      content: "";
+      display: block;
+      position: absolute;
+      z-index: -1;
+      top: calc(-1 * var(--theme-spacing-50));
+      left: calc(-1 * var(--theme-spacing-50));
+      bottom: calc(-1 * var(--theme-spacing-50));
+      right: calc(-1 * var(--theme-spacing-50));
+      border: var(--theme-border-width-100) var(--theme-color-focus) solid;
+      border-radius: var(--theme-border-radius-100);
+    }
+  }
+}

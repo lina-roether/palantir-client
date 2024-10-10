@@ -1,13 +1,15 @@
+@use "../../styles/utils";
+
 .palantir-button {
+  @include utils.focus-outline;
+
   cursor: pointer;
   background-color: transparent;
   border: none;
   padding: 0 var(--theme-spacing-50);
   filter: drop-shadow(var(--theme-shadow-100));
-  transition: filter var(--base-duration-50) ease-in-out;
+  transition: filter var(--base-duration-100) ease-in-out;
   position: relative;
-
-
 
   &__middle {
     width: 100%;
