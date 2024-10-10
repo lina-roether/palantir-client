@@ -23,12 +23,14 @@
   }
 
   &__middle {
+    width: 100%;
     display: inline-block;
     padding: var(--theme-spacing-50) 0;
     background-color: var(--theme-color-background-inverted-100);
   }
 
   &__inner {
+    width: 100%;
     border-color: var(--theme-color-text-inverted-100);
     transition: border-color var(--base-duration-50) ease-in-out;
     display: inline-block;
@@ -59,6 +61,7 @@
   &--secondary {
     color: var(--theme-color-text-100);
     filter: none;
+    padding: 0;
 
     &:hover {
       filter: none;
