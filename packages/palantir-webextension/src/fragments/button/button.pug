@@ -1,26 +1,7 @@
-mixin palantir-button(variant, buttonAtttributes)
-  button(class="palantir-button" class=`palantir-button--${variant}`)&attributes(buttonAttributes)&attributes(attributes)
-    span(
-      class="palantir-button__inner"
-      class={
-        "action-75": variant === "tertiary",
-        "action-100": variant !== "tertiary"
-      }
-    ): block
-
-    case variant
-      when "primary"
-      when "secondary"
-        span(class="palantir-button__gem-holder palantir-button__gem-holder--left")
-          span(class="palantir-button__gem")
-        span(class="palantir-button__gem-holder palantir-button__gem-holder--right")
-          span(class="palantir-button__gem")
-      when "tertiary"
-        span(class="palantir-button__gem-holder palantir-button__gem-holder--bottom")
-          span(class="palantir-button__gem palantir-button__gem--small")
-
-    if variant === "primary"
-      svg(class="palantir-button__upper-jaw" viewBox="0 0 100 80")
-        use(href=asset("images/button-decoration.svg#upper-jaw"))
-      svg(class="palantir-button__lower-jaw" viewBox="0 0 100 50")
-        use(href=asset("images/button-decoration.svg#lower-jaw"))
+mixin palantir-button(variant)
+  button(class="palantir-button" class=`palantir-button--${variant}`)&attributes(attributes)
+    div(class="palantir-button__middle")
+      div(class="palantir-button__inner action-100"): block
+    if variant != "secondary"
+      div(class="palantir-button__side palantir-button__side--left")
+      div(class="palantir-button__side palantir-button__side--right")

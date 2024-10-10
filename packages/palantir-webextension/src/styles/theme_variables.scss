@@ -5,9 +5,12 @@
   --theme-color-primary-100: var(--base-color-flame-100);
   --theme-color-primary-200: var(--base-color-flame-200);
   --theme-color-ornaments-100: var(--base-color-ash-200);
-  --theme-color-text-background: var(--base-color-sulfur-100);
-  --theme-color-text-primary: var(--base-color-sulfur-100);
-  --theme-color-text-secondary: var(--base-color-sulfur-100);
+  --theme-color-text-100: var(--base-color-sulfur-100);
+  --theme-color-text-200: var(--base-color-sulfur-200);
+  --theme-color-background-inverted-100: var(--base-color-sulfur-100);
+  --theme-color-background-inverted-200: var(--base-color-sulfur-200);
+  --theme-color-text-inverted-100: var(--base-color-char-100);
+  --theme-color-text-inverted-200: var(--base-color-ash-100);
 
   // Fonts
   --theme-font-display-100: 2.625rem/1.5 var(--base-font-family-fraktur);
@@ -40,5 +43,5 @@
 
   // Shadow
   --theme-shadow-100: 0 0 5px var(--base-color-shadow-char-100);
-  --theme-fire-100: 0 0 5px var(--base-color-shadow-flame-100);
+  --theme-fire-100: 0 0 10px var(--base-color-shadow-flame-100);
 }

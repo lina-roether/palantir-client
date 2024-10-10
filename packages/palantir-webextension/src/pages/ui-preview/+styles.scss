@@ -14,6 +14,7 @@
   &__row {
     display: flex;
     gap: var(--theme-spacing-200);
+    justify-content: center;
   }
 
   &__columns {
