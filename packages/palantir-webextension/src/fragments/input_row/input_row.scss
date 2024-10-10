@@ -26,4 +26,8 @@
   &:has(input:invalid) .palantir-input-row__label {
     color: var(--theme-color-error-200);
   }
+
+  &:has(input:disabled) .palantir-input-row__label {
+    color: var(--theme-color-background-disabled);
+  }
 }
