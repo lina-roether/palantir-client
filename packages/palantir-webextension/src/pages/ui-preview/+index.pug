@@ -39,5 +39,6 @@ block content
         +palantir-button("secondary") Secondary Button
 
     +palantir-card("Inputs", 2)
-      div(class="ui-preview__row")
-        +palantir-text-field()(value="Text Field")
+      +palantir-input-row() 
+        label(for="ui-preview__text-field") Text field
+        +palantir-text-field()(id="ui-preview__text-field" value="Text field content")

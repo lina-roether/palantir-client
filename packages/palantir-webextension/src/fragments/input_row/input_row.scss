@@ -1,0 +1,18 @@
+.palantir-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "label input";
+  gap: var(--theme-spacing-200);
+  align-items: center;
+
+  input {
+    grid-area: input;
+    justify-self: start;
+  }
+
+  label {
+    grid-area: label;
+    justify-self: end;
+    font: var(--theme-font-action-75);
+  }
+}

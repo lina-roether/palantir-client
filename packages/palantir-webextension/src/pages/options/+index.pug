@@ -9,8 +9,9 @@ block content
     form(id="options_form")
       ul(class="options__inputs")
         li(class="options__inputs-row")
-          +palantir-text-field()(class="options__input" name="server_url" id="server_url")
-          label(for="server_url" class="copy-100 no-gutter") Server URL
+          +palantir-input-row()
+            +palantir-text-field()(class="options__input" name="server_url" id="server_url")
+            label(for="server_url" class="copy-100 no-gutter") Server URL
       li(class="options__inputs-row")
         +palantir-button("primary")(type="submit" class="options__input") Save
         +palantir-button("secondary")(id="cancel" class="options__input") Cancel
