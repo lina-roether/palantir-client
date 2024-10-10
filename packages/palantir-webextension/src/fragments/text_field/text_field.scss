@@ -1,22 +1,9 @@
 .palantir-text-field {
   display: inline-block;
-  background-color: var(--theme-color-detail-100);
-  border: var(--theme-border-width-50) var(--theme-color-detail-100) solid;
-  border-top-color: var(--theme-color-detail-200);
-  border-left-color: var(--theme-color-detail-200);
-  border-radius: var(--theme-border-radius-100);
-  width: fit-content;
-  height: fit-content;
-
-  &__input {
-    border: var(--theme-border-width-50) var(--theme-color-detail-100) solid;
-    border-bottom-color: var(--theme-color-detail-200);
-    border-right-color: var(--theme-color-detail-200);
-    border-radius: var(--theme-border-radius-100);
-    padding: var(--theme-spacing-50);
-    background-color: var(--theme-color-secondary-200);
-    color: var(--theme-color-text-secondary);
-    font: var(--theme-font-copy-100);
-    width: 100%;
-  }
+  font: var(--theme-font-copy-100);
+  color: var(--theme-color-text-100);
+  background-color: transparent;
+  border: none;
+  padding: var(--theme-spacing-50);
+  border-bottom: var(--theme-color-text-100) var(--theme-border-width-100) dashed;
 }
