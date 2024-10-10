@@ -1,39 +1,24 @@
 .palantir-button {
   cursor: pointer;
   background-color: transparent;
-  color: var(--theme-color-text-inverted-100);
   border: none;
   padding: 0 var(--theme-spacing-50);
   filter: drop-shadow(var(--theme-shadow-100));
   transition: filter var(--base-duration-50) ease-in-out;
   position: relative;
 
-  &:hover {
-    filter: drop-shadow(var(--theme-fire-200));
 
-    .palantir-button__inner {
-      border-color: var(--theme-color-primary-100);
-    }
-  }
-
-  &:active {
-    .palantir-button__middle, .palantir-button__side {
-      background-color: var(--theme-color-background-inverted-200);
-    }
-  }
 
   &__middle {
     width: 100%;
     display: inline-block;
     padding: var(--theme-spacing-50) 0;
-    background-color: var(--theme-color-background-inverted-100);
   }
 
   &__inner {
     width: 100%;
     border-top: var(--theme-border-width-50) dashed;
     border-bottom: var(--theme-border-width-50) dashed;
-    border-color: var(--theme-color-text-inverted-100);
     transition: border-color var(--base-duration-50) ease-in-out;
     display: inline-block;
     padding: var(--theme-spacing-50);
@@ -41,7 +26,6 @@
 
   &__side {
     display: inline-block;
-    background-color: var(--theme-color-background-inverted-100);
     height: 100%;
     width: var(--theme-spacing-50);
     position: absolute;
@@ -58,23 +42,41 @@
     }
   }
 
-  &--secondary {
-    color: var(--theme-color-text-100);
-
-    .palantir-button__inner {
-      border-color: transparent;
-    }
+  &--primary {
+    color: var(--theme-color-text-inverted-100);
 
     &:hover {
       filter: drop-shadow(var(--theme-fire-200));
 
       .palantir-button__inner {
-        border-color: transparent;
+        border-color: var(--theme-color-primary-100);
       }
     }
 
     &:active {
+      .palantir-button__middle, .palantir-button__side {
+        background-color: var(--theme-color-background-inverted-200);
+      }
+    }
 
+    .palantir-button__middle, .palantir-button__side {
+        background-color: var(--theme-color-background-inverted-100);
+    }
+
+    .palantir-button__inner {
+      border-color: var(--theme-color-text-inverted-100);
+    }
+  }
+
+  &--secondary {
+    color: var(--theme-color-text-100);
+
+
+    &:hover {
+      filter: drop-shadow(var(--theme-fire-200));
+    }
+
+    &:active {
       .palantir-button__middle, .palantir-button__side {
         background-color: var(--theme-color-background-300);
       }
@@ -82,6 +84,10 @@
 
     .palantir-button__middle, .palantir-button__side {
         background-color: var(--theme-color-background-200);
+    }
+
+    .palantir-button__inner {
+      border-color: transparent;
     }
   }
 }
