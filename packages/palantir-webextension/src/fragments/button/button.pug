@@ -2,6 +2,5 @@ mixin palantir-button(variant)
   button(class="palantir-button" class=`palantir-button--${variant}`)&attributes(attributes)
     div(class="palantir-button__middle")
       div(class="palantir-button__inner action-100"): block
-    if variant != "secondary"
       div(class="palantir-button__side palantir-button__side--left")
       div(class="palantir-button__side palantir-button__side--right")

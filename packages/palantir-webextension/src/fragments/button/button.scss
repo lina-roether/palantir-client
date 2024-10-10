@@ -9,7 +9,7 @@
   position: relative;
 
   &:hover {
-    filter: drop-shadow(var(--theme-fire-100));
+    filter: drop-shadow(var(--theme-fire-200));
 
     .palantir-button__inner {
       border-color: var(--theme-color-primary-100);
@@ -31,12 +31,12 @@
 
   &__inner {
     width: 100%;
+    border-top: var(--theme-border-width-50) dashed;
+    border-bottom: var(--theme-border-width-50) dashed;
     border-color: var(--theme-color-text-inverted-100);
     transition: border-color var(--base-duration-50) ease-in-out;
     display: inline-block;
     padding: var(--theme-spacing-50);
-    border-top: var(--theme-border-width-50) dashed;
-    border-bottom: var(--theme-border-width-50) dashed;
   }
 
   &__side {
@@ -60,27 +60,28 @@
 
   &--secondary {
     color: var(--theme-color-text-100);
-    filter: none;
-    padding: 0;
 
-    &:hover {
-      filter: none;
+    .palantir-button__inner {
+      border-color: transparent;
     }
 
-    &:active {
-      color: var(--theme-color-text-200);
+    &:hover {
+      filter: drop-shadow(var(--theme-fire-200));
 
-      .palantir-button__middle, .palantir-button__side {
-        background-color: transparent;
+      .palantir-button__inner {
+        border-color: transparent;
       }
     }
 
-    .palantir-button__middle {
-      background-color: transparent;
+    &:active {
+
+      .palantir-button__middle, .palantir-button__side {
+        background-color: var(--theme-color-background-300);
+      }
     }
 
-    .palantir-button__inner {
-      border-color: var(--theme-color-text-100);
+    .palantir-button__middle, .palantir-button__side {
+        background-color: var(--theme-color-background-200);
     }
   }
 }
