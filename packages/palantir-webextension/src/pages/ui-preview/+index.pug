@@ -34,11 +34,19 @@ block content
             | aliquid dolorem error quia.
     
     +palantir-card("Buttons", 2)
+      h3(class="heading-200") Default buttons
       div(class="ui-preview__row")
         +palantir-button("primary") Primary Button
         +palantir-button("secondary") Secondary Button
+      h3(class="heading-200") Disabled buttons
+      div(class="ui-preview__row")
+        +palantir-button("primary")(disabled) Primary Button
+        +palantir-button("secondary")(disabled) Secondary Button
 
     +palantir-card("Inputs", 2)
       +palantir-input-row() 
         label(for="ui-preview__text-field") Text field
         +palantir-text-field()(id="ui-preview__text-field" value="Text field content")
+      +palantir-input-row() 
+        label(for="ui-preview__text-field") Disabled text field
+        +palantir-text-field()(id="ui-preview__text-field" value="Text field content" disabled)

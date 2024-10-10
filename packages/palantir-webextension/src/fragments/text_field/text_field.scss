@@ -20,4 +20,10 @@ $defaultWidth: 250px;
     background-color: var(--theme-color-background-200);
     box-shadow: var(--theme-shadow-100);
   }
+
+  &:disabled {
+    color: var(--theme-color-text-disabled);
+    border-color: var(--theme-color-text-disabled);
+    background-color: var(--theme-color-background-disabled);
+  }
 }
