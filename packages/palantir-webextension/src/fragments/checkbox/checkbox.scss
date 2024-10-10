@@ -1,0 +1,21 @@
+.palantir-checkbox {
+  appearance: none;
+  display: inline-block;
+  border-radius: var(--theme-border-radius-50);
+  border: var(--theme-border-width-100) var(--theme-color-text-100) solid;
+  width: 1.2rem;
+  height: 1.2rem;
+  vertical-align: center;
+
+  &:checked {
+    background-color: var(--theme-color-primary-100);
+  }
+
+  &:disabled {
+    border-color: var(--theme-color-background-disabled);
+
+    &:checked {
+      background-color: var(--theme-color-text-disabled);
+    }
+  }
+}

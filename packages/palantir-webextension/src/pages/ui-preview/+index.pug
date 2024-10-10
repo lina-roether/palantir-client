@@ -48,5 +48,14 @@ block content
         label(for="ui-preview__text-field") Text field
         +palantir-text-field()(id="ui-preview__text-field" value="Text field content")
       +palantir-input-row() 
-        label(for="ui-preview__text-field") Disabled text field
-        +palantir-text-field()(id="ui-preview__text-field" value="Text field content" disabled)
+        label(for="ui-preview__disabled-text-field") Disabled text field
+        +palantir-text-field()(id="ui-preview__disabled-text-field" value="Text field content" disabled)
+      +palantir-input-row() 
+        label(for="ui-preview__checkbox") Checkbox
+        +palantir-checkbox()(id="ui-preview__checkbox" checked)
+      +palantir-input-row() 
+        label(for="ui-preview__disabled-checkbox") Disabled checkbox (checked)
+        +palantir-checkbox()(id="ui-preview__disabled-checkbox" checked disabled)
+      +palantir-input-row() 
+        label(for="ui-preview__disabled-checkbox") Disabled checkbox (unchecked)
+        +palantir-checkbox()(id="ui-preview__disabled-checkbox" disabled)
