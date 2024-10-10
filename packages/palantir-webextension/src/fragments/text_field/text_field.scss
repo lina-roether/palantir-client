@@ -26,4 +26,8 @@ $defaultWidth: 250px;
     border-color: var(--theme-color-text-disabled);
     background-color: var(--theme-color-background-disabled);
   }
+
+  &:invalid {
+    background-color: var(--theme-color-error-100);
+  }
 }

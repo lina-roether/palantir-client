@@ -11,9 +11,19 @@
     justify-self: start;
   }
 
-  label {
+  &__label {
     grid-area: label;
-    justify-self: end;
+    justify-self: right;
+    width: fit-content;
+    text-align: right;
     font: var(--theme-font-action-75);
+  }
+
+  &__error {
+    font: var(--theme-font-copy-75);
+  }
+
+  &:has(input:invalid) .palantir-input-row__label {
+    color: var(--theme-color-error-200);
   }
 }

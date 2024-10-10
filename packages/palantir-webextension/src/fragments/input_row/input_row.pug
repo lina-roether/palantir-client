@@ -1,2 +1,6 @@
-mixin palantir-input-row(id)
-  div(class="palantir-input-row"): block
+mixin palantir-input-row(id, label)
+  div(class="palantir-input-row js_palantir-input-row")
+    div(class="palantir-input-row__label")
+      label(for=id) #{label}
+      div(class="palantir-input-row__error js_palantir-input-row__error")
+    block
