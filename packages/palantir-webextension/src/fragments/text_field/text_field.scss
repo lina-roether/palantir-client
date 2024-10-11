@@ -23,6 +23,7 @@ $defaultWidth: 250px;
   }
 
   &:disabled {
+    transition: none;
     color: var(--theme-color-text-disabled);
     border-color: var(--theme-color-text-disabled);
     background-color: var(--theme-color-background-disabled);

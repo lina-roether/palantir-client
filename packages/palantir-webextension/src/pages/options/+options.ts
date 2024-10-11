@@ -43,8 +43,13 @@ function validateServerUrl() {
 function reset() {
 	getConfig().then((config) => {
 		serverUrlInput.value = config.serverUrl ?? "";
+		serverUrlInput.dispatchEvent(new Event("change"));
+
 		useApiKeyInput.checked = config.apiKey !== undefined;
+
 		apiKeyInput.value = config.apiKey ?? "";
+		apiKeyInput.dispatchEvent(new Event("change"));
+
 		updateFormState();
 	}).catch((err: unknown) => { log.error(err); });
 

@@ -4,19 +4,21 @@ function init(elem: HTMLElement) {
 	const input = elem.querySelector("input");
 	if (input) {
 		const error = assertTypedElement(".js_palantir-input-row__error", HTMLElement, elem);
-		
+
 		updateErrorMessage();
-		
+
 		function updateErrorMessage() {
-			error.innerText = input.validationMessage;
+			// queueing a microtask solves many issues here; we don't want this code to fire
+			// before the code that owns the input has had a chance to update its state
+			setTimeout(() => error.innerText = input?.validationMessage ?? "");
 		}
 
 		input.addEventListener("change", () => {
-			setTimeout(() => { updateErrorMessage() });
+			updateErrorMessage();
 		});
 
 		input.addEventListener("input", () => {
-			setTimeout(() => { updateErrorMessage() });
+			updateErrorMessage();
 		});
 	}
 }
