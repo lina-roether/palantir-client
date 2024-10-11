@@ -1,26 +1,33 @@
 .palantir-input-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-areas: "label input";
+  grid-template-areas: "input label";
   gap: var(--theme-spacing-200);
   align-items: center;
   padding: var(--theme-spacing-100) 0;
 
   input {
     grid-area: input;
-    justify-self: start;
+    justify-self: end;
   }
 
   &__label {
     grid-area: label;
-    justify-self: right;
+    justify-self: start;
     width: fit-content;
-    text-align: right;
     font: var(--theme-font-action-75);
   }
 
   &__error {
     font: var(--theme-font-copy-75);
+  }
+
+  &:has(input[changed]) .palantir-input-row__label {
+    color: var(--theme-color-text-highlighted);
+
+    label::after {
+      content: "*";
+    }
   }
 
   &:has(input:invalid) .palantir-input-row__label {
@@ -29,5 +36,9 @@
 
   &:has(input:disabled) .palantir-input-row__label {
     color: var(--theme-color-background-disabled);
+
+    .palantir-input-row__error {
+      display: none;
+    }
   }
 }
