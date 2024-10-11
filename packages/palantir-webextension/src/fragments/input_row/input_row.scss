@@ -4,7 +4,7 @@
   grid-template-areas: "label input";
   gap: var(--theme-spacing-200);
   align-items: center;
-  padding: var(--theme-spacing-50) 0;
+  padding: var(--theme-spacing-100) 0;
 
   input {
     grid-area: input;
