@@ -1,95 +1,75 @@
 import log from "log";
-import { getConfig, setConfig } from "../../config";
-import { assertTypedElement } from "../../utils";
+import { getConfig, setConfig, type Config } from "../../config";
+import { assertTypedElement, FormMode, initForm } from "../../utils";
 
-const form = assertTypedElement("#options_form", HTMLFormElement);
-const submitButton = assertTypedElement("#options_submit", HTMLButtonElement);
-const cancelButton = assertTypedElement("#options_cancel", HTMLButtonElement);
-const serverUrlInput = assertTypedElement("#options_server-url", HTMLInputElement);
-const useApiKeyInput = assertTypedElement("#options_use-api-key", HTMLInputElement);
-const apiKeyInput = assertTypedElement("#options_api-key", HTMLInputElement);
+const cancelButton = assertTypedElement("#options__cancel", HTMLButtonElement);
+const useApiKeyInput = assertTypedElement("#options__use-api-key", HTMLInputElement);
+const apiKeyInput = assertTypedElement("#options__api-key", HTMLInputElement);
 
-updateFormState();
+let cachedConfig: Config | null = null;
 
-function updateFormState() {
-	updateApiKeyInput();
-	validateServerUrl();
-	checkCanSave();
+async function getCachedConfig(): Promise<Config> {
+	if (!cachedConfig) cachedConfig = await getConfig();
+	return cachedConfig;
 }
 
-function checkCanSave() {
-	const valid = form.checkValidity();
-	const hasChanges = !!form.querySelector("input[changed]");
-	submitButton.disabled = !valid || !hasChanges;
-}
+
+initForm({
+	query: "#options__form",
+	mode: FormMode.EDIT,
+	onSubmit,
+	fields: {
+		serverUrl: {
+			value: async () => (await getCachedConfig()).serverUrl ?? "",
+			validate: validateServerUrl
+		},
+		useApiKey: {
+			value: async () => (await getCachedConfig()).apiKey !== undefined,
+		},
+		apiKey: {
+			value: async () => (await getCachedConfig()).apiKey ?? ""
+		}
+	}
+}).then((form) => {
+
+	cancelButton.addEventListener("click", (evt) => {
+		evt.preventDefault();
+		void form.reset();
+	});
+}).catch((err: unknown) => {
+	log.error(`Failed to initialize form: ${err?.toString() ?? "unknown error"}`);
+});
+
 
 function updateApiKeyInput() {
 	apiKeyInput.disabled = !useApiKeyInput.checked;
 }
 
-function validateServerUrl() {
-	const url = URL.parse(serverUrlInput.value);
+function validateServerUrl(value: FormDataEntryValue | null) {
+	if (typeof value !== "string") {
+		return "Only text input is allowed";
+	}
+	const url = URL.parse(value);
 	if (!url) {
-		serverUrlInput.setCustomValidity("Please enter a valid URL");
-		return;
+		return "Please enter a valid URL";
 	}
 	if (!["ws:", "wss:"].includes(url.protocol)) {
-		serverUrlInput.setCustomValidity("Please enter a websocket url (wss://)");
-		return;
-	}
-	serverUrlInput.setCustomValidity("");
-}
-
-function reset() {
-	getConfig().then((config) => {
-		serverUrlInput.value = config.serverUrl ?? "";
-		serverUrlInput.dispatchEvent(new Event("change"));
-
-		useApiKeyInput.checked = config.apiKey !== undefined;
-
-		apiKeyInput.value = config.apiKey ?? "";
-		apiKeyInput.dispatchEvent(new Event("change"));
-
-		updateFormState();
-	}).catch((err: unknown) => { log.error(err); });
-
-	for (const elem of form.querySelectorAll("input[changed]")) {
-		elem.removeAttribute("changed");
+		return "Please enter a websocket url (wss://)";
 	}
 }
 
-form.addEventListener("submit", (evt) => {
-	evt.preventDefault();
-	const data = new FormData(form);
-
+function onSubmit(data: FormData) {
 	const serverUrl = (data.get("serverUrl") ?? "") as string;
 	const useApiKey = !!data.get("useApiKey");
 	const apiKey = (data.get("apiKey") ?? "") as string;
 
 
-	setConfig({ serverUrl, apiKey: useApiKey ? apiKey : undefined }).catch((err: unknown) => { log.error(`Failed to set config: %s`, err); });
-})
-
-serverUrlInput.addEventListener("input", () => {
-	serverUrlInput.setAttribute("changed", "");
-	validateServerUrl();
-	checkCanSave();
-})
+	setConfig({ serverUrl, apiKey: useApiKey ? apiKey : undefined })
+		.catch((err: unknown) => { log.error(`Failed to set config: %s`, err); });
+}
 
 useApiKeyInput.addEventListener("change", () => {
-	useApiKeyInput.setAttribute("changed", "");
 	updateApiKeyInput();
-	checkCanSave();
 })
 
-apiKeyInput.addEventListener("input", () => {
-	apiKeyInput.setAttribute("changed", "");
-	checkCanSave();
-})
-
-cancelButton.addEventListener("click", (evt) => {
-	evt.preventDefault();
-	reset();
-});
-
-reset();
+updateApiKeyInput();
