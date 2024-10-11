@@ -3,7 +3,8 @@
 $defaultWidth: 250px;
 
 .palantir-text-field {
-  width: $defaultWidth;
+  width: 100%;
+  max-width: $defaultWidth;
   display: inline-block;
   font: var(--theme-font-copy-100);
   color: var(--theme-color-text-100);
