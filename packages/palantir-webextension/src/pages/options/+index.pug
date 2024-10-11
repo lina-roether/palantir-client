@@ -7,14 +7,15 @@ block append head
 block content
   +palantir-card("Settings")(class="options__wrapper")
     form(id="options_form")
+      h2(class="heading-100") Server connection
       +palantir-input-row("options_server-url", "Server URL")
-        +palantir-text-field()(id="options_server-url" name="serverUrl")
+        +palantir-text-field()(id="options_server-url" required name="serverUrl")
       +palantir-input-row("options_use-api-key", "Use API key")
         +palantir-checkbox()(id="options_use-api-key" name="useApiKey")
       +palantir-input-row("options_api-key", "API key")
-        +palantir-text-field()(id="options_api-key" name="apiKey")
+        +palantir-text-field()(id="options_api-key" required name="apiKey")
       +palantir-form-actions()
-        +palantir-button("primary")(type="submit") Save
+        +palantir-button("primary")(type="submit" id="options_submit") Save
         +palantir-button("secondary")(id="options_cancel") Cancel
 
 block append scripts

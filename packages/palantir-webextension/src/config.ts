@@ -4,7 +4,8 @@ import * as z from "zod";
 const logger = log.get("config");
 
 const ConfigSchema = z.object({
-	serverUrl: z.string().url().optional()
+	serverUrl: z.string().url().optional(),
+	apiKey: z.string().optional()
 })
 
 export type Config = z.infer<typeof ConfigSchema>;
