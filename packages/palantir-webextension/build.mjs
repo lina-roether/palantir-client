@@ -35,6 +35,7 @@ logger.info(`Building version ${VERSION} of ${BUILD_NAME}`);
 const ENTRY_POINT_MATCHER = /^\+([^.]+).(.+)$/;
 const ENTRY_POINT_TYPES = {
 	"ts": "typescript",
+	"mjs": "javascript",
 	"scss": "scss",
 	"pug": "pug",
 	"json.mjs": "json_build_esm"
@@ -43,6 +44,7 @@ const ENTRY_POINT_TYPES = {
 function getBundleFileName(name, type) {
 	switch (type) {
 		case "typescript":
+		case "javascript":
 			return `${name}.js`
 		case "scss":
 			return `${name}.css`
@@ -133,7 +135,7 @@ async function getBundles() {
 }
 
 async function buildTypescript(bundle, context) {
-	logger.debug(`Compiling bundle ${bundle.srcName} with swc`);
+	logger.debug(`Compiling bundle ${bundle.srcName} with esbuild`);
 
 	await esbuild.build({
 		entryPoints: [bundle.input],
@@ -207,6 +209,7 @@ async function build(bundle, globalContext, config) {
 	await fs.mkdir(path.dirname(bundle.output), { recursive: true });
 	switch (bundle.type) {
 		case "typescript":
+		case "javascript":
 			await buildTypescript(bundle, context);
 			break;
 		case "scss":
