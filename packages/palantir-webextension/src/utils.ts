@@ -91,13 +91,13 @@ interface FieldValidationState {
 	valid: boolean;
 }
 
-export async function initForm<F extends string>(options: FormOptions<F>, rootElem: Element = document.body): Promise<FormManager<F>> {
+export function initForm<F extends string>(options: FormOptions<F>, rootElem: Element = document.body): FormManager<F> {
 	const form = assertTypedElement(options.query, HTMLFormElement, rootElem);
-	const initialValues: FormValues<F> = {};
+	const initialValueGetters: Partial<Record<F, () => Promise<FormFieldValue>>> = {};
 	for (const fieldName in options.fields) {
 		const valueOrGetter = options.fields[fieldName]?.value;
-		const value = typeof valueOrGetter === "function" ? await valueOrGetter() : valueOrGetter;
-		initialValues[fieldName] = value;
+		if (typeof valueOrGetter === "function") initialValueGetters[fieldName] = async () => await valueOrGetter();
+		else if (valueOrGetter !== undefined) initialValueGetters[fieldName] = () => Promise.resolve(valueOrGetter);
 	}
 
 	async function set(values: FormValues<F>) {
@@ -133,10 +133,10 @@ export async function initForm<F extends string>(options: FormOptions<F>, rootEl
 	}
 
 	async function reset() {
-		await set(initialValues);
+		await set(initialValueGetters);
 	}
 
-	const submitElements = form.querySelectorAll(`input[type="submit"], button[type"submit"]`);
+	const submitElements = form.querySelectorAll(`input[type="submit"], button[type="submit"]`);
 	const validationState: Record<string, FieldValidationState> = {};
 
 	function computeCanSubmit() {
@@ -159,52 +159,78 @@ export async function initForm<F extends string>(options: FormOptions<F>, rootEl
 		}
 	}
 
-	for (const fieldName in form.elements) {
-		const input = form.elements[fieldName];
-		const initialValue = initialValues[fieldName as F];
-		if (!(input instanceof HTMLInputElement)) continue;
-
-		const validator = options.fields[fieldName as F]?.validate;
+	function validateField(input: HTMLInputElement): boolean {
+		const validator = options.fields[input.name as F]?.validate;
 		if (validator) {
 			input.setCustomValidity(validator(input.value) ?? "");
 		}
-
-		validationState[fieldName] = {
-			changed: false,
-			valid: input.checkValidity()
-		}
-
-		let updateEvent;
-		switch (input.type) {
-			case "checkbox":
-				updateEvent = "change"
-				break;
-			case "text":
-			default:
-				updateEvent = "input"
-		}
-
-		input.addEventListener(updateEvent, () => {
-			let changed = false;
-			if (input.type === "checkbox") {
-				changed = input.checked !== initialValue;
-			} else {
-				changed = input.value !== initialValue;
-			}
-			if (changed) input.setAttribute("changed", "");
-			else input.removeAttribute("changed");
-			validationState[fieldName] = {
-				changed,
-				valid: input.checkValidity()
-			}
-			setSubmitButtonState();
-		});
+		return input.checkValidity();
 	}
+
+	async function checkFieldChanged(input: HTMLInputElement): Promise<boolean> {
+		let changed = false;
+		const initialValueGetter = initialValueGetters[input.name as F];
+		const initialValue = initialValueGetter ? await initialValueGetter() : undefined;
+
+		if (input.type === "checkbox") {
+			changed = input.checked !== (initialValue ?? false);
+		} else {
+			changed = input.value !== (initialValue ?? "");
+		}
+
+		if (changed) input.setAttribute("changed", "");
+		else input.removeAttribute("changed");
+
+		return changed;
+	}
+
+	async function updateFieldState(input: HTMLInputElement) {
+		const valid = validateField(input);
+		const changed = await checkFieldChanged(input);
+
+		validationState[input.name] = {
+			changed,
+			valid
+		}
+		setSubmitButtonState();
+	}
+
+	async function updateAllFields() {
+		for (const input of form.elements) {
+			if (!(input instanceof HTMLInputElement)) continue;
+
+			await updateFieldState(input);
+		}
+	}
+
+	function setFieldChangeListeners() {
+		for (const input of form.elements) {
+			if (!(input instanceof HTMLInputElement)) continue;
+
+			let updateEvent;
+			switch (input.type) {
+				case "checkbox":
+					updateEvent = "change"
+					break;
+				case "text":
+				default:
+					updateEvent = "input"
+			}
+
+			input.addEventListener(updateEvent, () => {
+				void updateFieldState(input);
+			});
+		}
+	}
+
+	void updateAllFields();
+	setFieldChangeListeners();
 
 	form.addEventListener("submit", (evt) => {
 		evt.preventDefault();
 		const data = new FormData(form);
 		options.onSubmit?.(data);
+		void updateAllFields();
 	});
 
 	// initial setup
