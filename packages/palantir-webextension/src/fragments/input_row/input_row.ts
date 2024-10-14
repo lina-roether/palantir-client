@@ -20,6 +20,10 @@ function init(elem: HTMLElement) {
 		input.addEventListener("input", () => {
 			updateErrorMessage();
 		});
+
+		input.addEventListener("invalid", () => {
+			updateErrorMessage();
+		});
 	}
 }
 
