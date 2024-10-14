@@ -130,6 +130,7 @@ export function initForm<F extends string>(options: FormOptions<F>, rootElem: El
 			}
 			input.dispatchEvent(new CustomEvent("change", { detail: { formSynthetic: true } }));
 		}
+		await updateAllFields();
 	}
 
 	async function reset() {
@@ -164,6 +165,7 @@ export function initForm<F extends string>(options: FormOptions<F>, rootElem: El
 		if (validator) {
 			input.setCustomValidity(validator(input.value) ?? "");
 		}
+		console.log("Validating input field:", input, validator?.(input.value));
 		return input.checkValidity();
 	}
 
@@ -220,11 +222,16 @@ export function initForm<F extends string>(options: FormOptions<F>, rootElem: El
 			input.addEventListener(updateEvent, () => {
 				void updateFieldState(input);
 			});
+
+			// To allow detecting when inputs become enabled/disabled, because validation
+			// doesn't work properly when fields are disabled
+			const attrObserver = new MutationObserver(() => {
+				void updateFieldState(input);
+			});
+			attrObserver.observe(input, { attributes: true, attributeFilter: ["disabled"] });
 		}
 	}
 
-	void updateAllFields();
-	setFieldChangeListeners();
 
 	form.addEventListener("submit", (evt) => {
 		evt.preventDefault();
@@ -234,8 +241,10 @@ export function initForm<F extends string>(options: FormOptions<F>, rootElem: El
 	});
 
 	// initial setup
-	void reset();
-	setSubmitButtonState();
+	void reset()
+		.then(() => updateAllFields())
+		.then(() => { setSubmitButtonState() });
+	setFieldChangeListeners();
 
 	return { set, reset };
 }
