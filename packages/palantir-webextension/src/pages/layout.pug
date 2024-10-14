@@ -6,6 +6,7 @@ html
     block head
       if target != "firefox"
         script(src=include("+webextension-polyfill.ts"))
+      script(src=include("+head.ts"))
       link(rel="icon" href=asset("images/favicon.ico"))
       link(rel="stylesheet" href=include("pages/+common.scss"))
   body

@@ -4,12 +4,12 @@ import esbuild from "esbuild";
 import * as sass from "sass";
 import pug from "pug";
 import { Listr } from "listr2";
-import log from "log";
-import logNode from "log-node";
+import log from "@just-log/core";
+import initLogWriter from "@just-log/node";
 
-logNode();
+initLogWriter();
 
-const logger = log.get("build");
+const logger = log.sub("build");
 
 const SRC_DIR = path.resolve("src");
 const ASSETS_DIR = path.resolve("assets");
@@ -30,7 +30,7 @@ if (!VERSION) {
 	process.exit(1);
 }
 
-log.notice("Building version %s of %s", VERSION, BUILD_NAME);
+logger.info(`Building version ${VERSION} of ${BUILD_NAME}`);
 
 const ENTRY_POINT_MATCHER = /^\+([^.]+).(.+)$/;
 const ENTRY_POINT_TYPES = {
@@ -62,7 +62,7 @@ async function getBuildConfig(globalContext) {
 		if (e.code !== "ENOENT") logger.error(`Failed to access build config: ${e}`);
 		return {};
 	}
-	logger.debug("Reading build config from %s", BUILD_CONFIG_FILE);
+	logger.debug(`Reading build config from ${BUILD_CONFIG_FILE}`);
 	const mod = await import(BUILD_CONFIG_FILE);
 	let value;
 	switch (typeof mod.default) {
@@ -75,7 +75,7 @@ async function getBuildConfig(globalContext) {
 		default:
 			throw new Error(`Expected either object or function as default export from build config, but got ${typeof mod}`);
 	}
-	logger.debug("Build config is %O", value);
+	logger.debug(`Build config is ${JSON.stringify(value)}`);
 	return value;
 }
 
@@ -94,7 +94,7 @@ function getBundle(entry, baseDir) {
 	const distName = path.join(baseDir, getBundleFileName(name, type));
 	const srcName = path.join(baseDir, entry.name);
 	const output = path.join(OUTPUT_DIR, distName);
-	logger.debug("Found bundle of type %s at %s that will output to %s", type, input, output);
+	logger.debug(`Found bundle of type ${type} at ${input} that will output to ${output}`);
 	return {
 		srcName,
 		distName,
@@ -105,7 +105,7 @@ function getBundle(entry, baseDir) {
 }
 
 async function getBundlesRecursive(bundles, distFiles, baseDir) {
-	logger.debug(`Searching %s for bundles...`, baseDir)
+	logger.debug(`Searching ${baseDir} for bundles...`)
 	const srcDir = await fs.opendir(path.join(SRC_DIR, baseDir));
 	for await (const entry of srcDir) {
 		if (entry.isDirectory()) {
@@ -117,12 +117,7 @@ async function getBundlesRecursive(bundles, distFiles, baseDir) {
 
 		if (bundle.distName in distFiles) {
 			const conflictBundle = distFiles[bundle.distName];
-			logger.error(
-				"Failed to resolve bundle %s: file %s is already produced by bundle %s",
-				bundle.srcName,
-				bundle.distName,
-				conflictBundle.srcName
-			);
+			logger.error(`Failed to resolve bundle ${bundle}: file ${bundle} is already produced by bundle ${conflictBundle.srcName.distName.srcName}`);
 			continue;
 		}
 		distFiles[bundle.distName] = bundle;
@@ -138,7 +133,7 @@ async function getBundles() {
 }
 
 async function buildTypescript(bundle, context) {
-	logger.debug("Compiling bundle %s with swc", bundle.srcName);
+	logger.debug(`Compiling bundle ${bundle.srcName} with swc`);
 
 	await esbuild.build({
 		entryPoints: [bundle.input],
@@ -151,7 +146,7 @@ async function buildTypescript(bundle, context) {
 }
 
 async function buildScss(bundle, context) {
-	logger.debug("Compiling bundle %s with sass", bundle.srcName);
+	logger.debug(`Compiling bundle ${bundle.srcName} with sass`);
 	const compiled = sass.compile(bundle.input, {
 		style: context.environment === "debug" ? "expanded" : "compressed",
 		sourceMap: context.environment === "debug"
@@ -159,7 +154,7 @@ async function buildScss(bundle, context) {
 	let cssContent = compiled.css;
 
 	if (compiled.sourceMap) {
-		logger.debug("Found source maps for %s", bundle.distName);
+		logger.debug(`Found source maps for ${bundle.distName}`);
 		const sourceMapName = `${bundle.distName}.map`;
 		const sourceMapOutput = path.join(OUTPUT_DIR, sourceMapName);
 		cssContent += `\n/*# sourceMappingURL=${sourceMapName}*/`;
@@ -172,7 +167,7 @@ async function buildScss(bundle, context) {
 async function buildPug(bundle, context) {
 	const sourceCode = await fs.readFile(bundle.input, { encoding: "utf-8" });
 
-	logger.debug("Compiling template %s with pug", bundle.srcName);
+	logger.debug(`Compiling template ${bundle.srcName} with pug`);
 	const template = pug.compile(sourceCode, {
 		filename: bundle.input,
 		basedir: SRC_DIR,
@@ -185,7 +180,7 @@ async function buildPug(bundle, context) {
 }
 
 async function buildJsonEsm(bundle, context) {
-	logger.debug("Evaluating json generator %s", bundle.srcName);
+	logger.debug(`Evaluating json generator ${bundle.srcName}`);
 	const mod = await import(bundle.input);
 	let value;
 	switch (typeof mod.default) {
@@ -205,7 +200,7 @@ async function buildJsonEsm(bundle, context) {
 async function build(bundle, globalContext, config) {
 	const exclude = config.exclude ?? [];
 	if (exclude.includes(bundle.srcName)) {
-		logger.notice("%s is excluded for this build", bundle.srcName);
+		logger.info(`${bundle.srcName} is excluded for this build`);
 		return;
 	}
 	const context = createBundleContext(globalContext, bundle);
@@ -230,10 +225,10 @@ async function build(bundle, globalContext, config) {
 
 async function preBuildCleanup() {
 	try {
-		logger.debug("Removing %s...", OUTPUT_DIR);
+		logger.debug(`Removing ${OUTPUT_DIR}...`);
 		await fs.rm(OUTPUT_DIR, { recursive: true });
 	} catch (e) { }
-	logger.debug("Creating %s...", OUTPUT_DIR);
+	logger.debug(`Creating ${OUTPUT_DIR}...`);
 	await fs.mkdir(OUTPUT_DIR, { recursive: true });
 }
 

@@ -1,7 +1,7 @@
-import log from "log";
+import log from "@just-log/core";
 import * as z from "zod";
 
-const logger = log.get("config");
+const logger = log.sub("config");
 
 const ConfigSchema = z.object({
 	serverUrl: z.string().url().optional(),
@@ -19,7 +19,7 @@ export async function getConfig(): Promise<Config> {
 		logger.info("Reading synchronized config");
 		const result = await browser.storage.sync.get({ config: DEFAULT_CONFIG });
 		const config = ConfigSchema.parse(result.config);
-		logger.debug("Config is %O", config);
+		logger.debug(`Config is ${JSON.stringify(config)}`);
 		return config;
 	} catch (e) {
 		logger.error(`Failed to access storage API: ${e?.toString() ?? "Unknown Error"}`);
@@ -30,9 +30,9 @@ export async function getConfig(): Promise<Config> {
 export async function setConfig(config: Config): Promise<void> {
 	try {
 		logger.info("Saving synchronized config");
-		logger.debug("Config is %O", config);
+		logger.debug(`Config is ${JSON.stringify(config)}`);
 		await browser.storage.sync.set({ config });
 	} catch (e) {
-		logger.error(`Failed to access storage API: ${e?.toString() ?? "Unknown Error"}`);
+		logger.error(`Failed to access storage API: ${e?.toString() ?? "Unknown Error"} `);
 	}
 }

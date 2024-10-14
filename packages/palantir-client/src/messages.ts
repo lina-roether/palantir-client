@@ -1,9 +1,9 @@
 import * as z from "zod";
 import * as msgpack from "@msgpack/msgpack";
-import log from "log";
+import log from "@just-log/core";
 import { TypedEventTarget } from "./utils";
 
-const logger = log.get("messages");
+const logger = log.sub("messages");
 
 const ConnectionLoginMsgBodySchema = z.object({
 	username: z.string(),
@@ -123,13 +123,13 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 		this.ws.addEventListener("message", (evt) => {
 			try {
 				if (!(evt.data instanceof Uint8Array)) {
-					logger.error(`Expected to receive a Uint8Array, but got %o`, evt.data);
+					logger.error(`Expected to receive a Uint8Array, but got ${(evt.data as unknown)?.constructor.name ?? typeof evt.data}`);
 					return;
 				}
 				const message = this.decodeMessage(evt.data);
 				this.dispatchEvent(new MessageEvent(message));
 			} catch (e) {
-				logger.error(`Failed to decode received message: %s`, e);
+				logger.error(`Failed to decode received message: ${e?.toString() ?? "unknown error"}`);
 			}
 		});
 		this.ws.addEventListener("error", () => {
@@ -158,7 +158,7 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 		try {
 			this.ws.send(this.encodeMessage(body));
 		} catch (e) {
-			logger.error(`Failed to send message: %s`, e);
+			logger.error(`Failed to send message: ${e?.toString() ?? "unknown error"}`);
 		}
 	}
 

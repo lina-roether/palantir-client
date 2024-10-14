@@ -4,7 +4,7 @@
 	"version": "0.1.0",
 	"packageManager": "yarn@4.5.0",
 	"scripts": {
-		"clean": "rm -r dist",
+		"clean": "rm -rf dist",
 		"build:firefox-debug": "ENVIRONMENT=debug TARGET=firefox node build.mjs",
 		"build:firefox": "ENVIRONMENT=prod TARGET=firefox node build.mjs",
 		"build:chromium-debug": "ENVIRONMENT=debug TARGET=chromium node build.mjs",
@@ -13,14 +13,14 @@
 		"build:prod": "yarn clean && yarn build:firefox && yarn build:chromium"
 	},
 	"dependencies": {
-		"log": "^6.3.2",
-		"log-node": "^8.0.3",
+		"@just-log/browser": "^0.1.1",
+		"@just-log/core": "^0.1.1",
 		"tslib": "^2.7.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
+		"@just-log/node": "^0.1.1",
 		"@types/firefox-webext-browser": "^120.0.4",
-		"@types/log": "^6.3.3",
 		"@types/pug": "^2.0.10",
 		"esbuild": "^0.24.0",
 		"listr2": "^8.2.5",

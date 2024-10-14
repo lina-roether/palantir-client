@@ -1,4 +1,4 @@
-import log from "log";
+import log from "@just-log/core";
 import { getConfig, setConfig, type Config } from "../../config";
 import { assertTypedElement, FormMode, initForm } from "../../utils";
 
@@ -65,7 +65,7 @@ function onSubmit(data: FormData) {
 
 
 	setConfig({ serverUrl, apiKey: useApiKey ? apiKey : undefined })
-		.catch((err: unknown) => { log.error(`Failed to set config: %s`, err); });
+		.catch((err: unknown) => { log.error(`Failed to set config: ${err?.toString() ?? "unknown error"}`); });
 }
 
 useApiKeyInput.addEventListener("change", () => {

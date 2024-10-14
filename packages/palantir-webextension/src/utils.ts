@@ -1,6 +1,6 @@
-import log from "log";
+import log from "@just-log/core";
 
-const logger = log.get("utils");
+const logger = log.sub("utils");
 
 export function assertElement(query: string, rootElem: Element = document.body): Element {
 	const elem = rootElem.querySelector(query);
@@ -108,22 +108,22 @@ export async function initForm<F extends string>(options: FormOptions<F>, rootEl
 			const input = form.elements.namedItem(fieldName);
 
 			if (!input) {
-				logger.error("Form has no field with name %s", fieldName);
+				logger.error(`Form has no field with name ${fieldName}`);
 				continue;
 			}
 			if (!(input instanceof HTMLInputElement)) {
-				logger.error("Form field had unexpected type: %s", input.constructor.name);
+				logger.error(`Form field had unexpected type: ${input.constructor.name}`);
 				continue;
 			}
 			if (input.type === "checkbox") {
 				if (typeof value !== "boolean") {
-					logger.error("Cannot assign value %o to field %s: Only boolean values can be assigned to checkboxes", value, fieldName);
+					logger.error(`Cannot assign value ${JSON.stringify(value)} to field ${fieldName}: Only boolean values can be assigned to checkboxes`);
 					continue;
 				}
 				input.checked = value;
 			} else {
 				if (typeof value !== "string") {
-					logger.error("Cannot assign value %o to field %s: Only string values can be assigned to generic input elements", value, fieldName);
+					logger.error(`Cannot assign value ${JSON.stringify(value)} to field ${fieldName}: Only string values can be assigned to generic input elements`);
 					continue;
 				}
 				input.value = value;
