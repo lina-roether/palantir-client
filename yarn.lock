@@ -316,29 +316,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@just-log/browser@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "@just-log/browser@npm:0.1.1"
+"@just-log/browser@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@just-log/browser@npm:0.1.2"
   dependencies:
-    "@just-log/core": "npm:^0.1.1"
-  checksum: 10c0/238979bf6ec041952c9971cbb460fd3ee57b106e351a665949c0f17666f3bf2b60b3609b5b08b326a53683e5a2655d644384a24ff738d146cc2efcb05bb13c0c
+    "@just-log/core": "npm:^0.1.2"
+  peerDependencies:
+    "@just-log/core": ^0.1.2
+  checksum: 10c0/c5d1850e0f6f0c7425788c45ce5cfebff8753a57131053eb2eceec32df24b56a694e4835d1a712b046d533f0b57fee8af7921812a640b56194e66d25c6348eda
   languageName: node
   linkType: hard
 
-"@just-log/core@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "@just-log/core@npm:0.1.1"
-  checksum: 10c0/7330eb2267db9d6fca8b6f4adbb0a37fa6074b757641386cbeb5f40369749c90e6bee9351ce9a36f4d0c029fd350b698f657afd10a06dda3dd74a51e7c0b96a6
+"@just-log/core@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@just-log/core@npm:0.1.2"
+  checksum: 10c0/7e58ec11ba6e4724d4d9df055b79b068447fe3cea40d229d00355aa3390338e44c61d000db3aaf75dba6554b99f6da57679f773ba0e17d9791c81b3816dc1d08
   languageName: node
   linkType: hard
 
-"@just-log/node@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "@just-log/node@npm:0.1.1"
+"@just-log/node@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@just-log/node@npm:0.1.2"
   dependencies:
-    "@just-log/core": "npm:^0.1.1"
+    "@just-log/core": "npm:^0.1.2"
     picocolors: "npm:^1.1.0"
-  checksum: 10c0/339b5edd38be9d96c56db1ea34bd931953f0cf4a9c2d568bdc3f7e8f659d2a2f2bae884e6badb92e8a0ad52e84cfa3eb7f4d8fefb3a9df8945d41e8bd9f7e5e3
+  peerDependencies:
+    "@just-log/core": ^0.1.2
+  checksum: 10c0/ceb35bd2153884273bec9258e1e2873d45085d5faa945f3dc74afea9985685cff45386f513ede6d15553c49325363fe5eddb76ec6a80810ef473a9fe31c009d6
   languageName: node
   linkType: hard
 
@@ -1636,7 +1640,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "palantir-client@workspace:packages/palantir-client"
   dependencies:
-    "@just-log/core": "npm:^0.1.1"
+    "@just-log/core": "npm:^0.1.2"
     "@msgpack/msgpack": "npm:^3.0.0-beta2"
     tslib: "npm:^2.7.0"
     typescript: "npm:^5.6.2"
@@ -1648,9 +1652,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "palantir-webextension@workspace:packages/palantir-webextension"
   dependencies:
-    "@just-log/browser": "npm:^0.1.1"
-    "@just-log/core": "npm:^0.1.1"
-    "@just-log/node": "npm:^0.1.1"
+    "@just-log/browser": "npm:^0.1.2"
+    "@just-log/core": "npm:^0.1.2"
+    "@just-log/node": "npm:^0.1.2"
     "@types/firefox-webext-browser": "npm:^120.0.4"
     "@types/pug": "npm:^2.0.10"
     esbuild: "npm:^0.24.0"
