@@ -165,7 +165,6 @@ export function initForm<F extends string>(options: FormOptions<F>, rootElem: El
 		if (validator) {
 			input.setCustomValidity(validator(input.value) ?? "");
 		}
-		console.log("Validating input field:", input, validator?.(input.value));
 		return input.checkValidity();
 	}
 
