@@ -1,43 +1,33 @@
 import log from "@just-log/core";
-import { getConfig, setConfig, type Config } from "../../config";
+import { getConfig, setConfig } from "../../config";
 import { assertTypedElement, FormMode, initForm } from "../../utils";
 
 const cancelButton = assertTypedElement("#options__cancel", HTMLButtonElement);
 const useApiKeyInput = assertTypedElement("#options__use-api-key", HTMLInputElement);
 const apiKeyInput = assertTypedElement("#options__api-key", HTMLInputElement);
 
-let cachedConfig: Config | null = null;
-
-async function getCachedConfig(): Promise<Config> {
-	if (!cachedConfig) cachedConfig = await getConfig();
-	return cachedConfig;
-}
-
-
-initForm({
+const form = initForm({
 	query: "#options__form",
 	mode: FormMode.EDIT,
 	onSubmit,
 	fields: {
 		serverUrl: {
-			value: async () => (await getCachedConfig()).serverUrl ?? "",
+			value: async () => (await getConfig()).serverUrl ?? "",
 			validate: validateServerUrl
 		},
 		useApiKey: {
-			value: async () => (await getCachedConfig()).apiKey !== undefined,
+			value: async () => (await getConfig()).apiKey !== undefined,
 		},
 		apiKey: {
-			value: async () => (await getCachedConfig()).apiKey ?? ""
+			value: async () => (await getConfig()).apiKey ?? "",
+			validate: validateApiKey
 		}
 	}
-}).then((form) => {
+})
 
-	cancelButton.addEventListener("click", (evt) => {
-		evt.preventDefault();
-		void form.reset();
-	});
-}).catch((err: unknown) => {
-	log.error(`Failed to initialize form: ${err?.toString() ?? "unknown error"}`);
+cancelButton.addEventListener("click", (evt) => {
+	evt.preventDefault();
+	void form.reset();
 });
 
 
@@ -56,6 +46,14 @@ function validateServerUrl(value: FormDataEntryValue | null) {
 	if (!["ws:", "wss:"].includes(url.protocol)) {
 		return "Please enter a websocket url (wss://)";
 	}
+}
+
+function validateApiKey(value: FormDataEntryValue | null) {
+	if (typeof value !== "string") {
+		return "Only text input is allowed";
+	}
+	if (!value) return "Please enter an API key";
+	return "";
 }
 
 function onSubmit(data: FormData) {

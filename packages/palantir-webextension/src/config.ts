@@ -14,20 +14,36 @@ const DEFAULT_CONFIG: Config = {
 	serverUrl: undefined
 }
 
-export async function getConfig(): Promise<Config> {
+let cachedConfig: Config | null = null;
+
+async function getConfigCacheMiss(): Promise<Config> {
+	let result: Record<string, unknown>;
 	try {
 		logger.info("Reading synchronized config");
-		const result = await browser.storage.sync.get({ config: DEFAULT_CONFIG });
-		const config = ConfigSchema.parse(result.config);
-		logger.debug(`Config is ${JSON.stringify(config)}`);
-		return config;
+		result = await browser.storage.sync.get({ config: DEFAULT_CONFIG });
 	} catch (e) {
 		logger.error(`Failed to access storage API: ${e?.toString() ?? "Unknown Error"}`);
 		return {};
 	}
+	let config: Config;
+	try {
+		config = ConfigSchema.parse(result.config);
+		logger.debug(`Config is ${JSON.stringify(config)}`);
+	} catch (e) {
+		logger.error(`Config is corrupted: ${e?.toString() ?? "Unknown Error"}`);
+		config = DEFAULT_CONFIG;
+	}
+	cachedConfig = config;
+	return config;
+}
+
+export async function getConfig(): Promise<Config> {
+	if (cachedConfig) return cachedConfig;
+	return await getConfigCacheMiss();
 }
 
 export async function setConfig(config: Config): Promise<void> {
+	cachedConfig = null;
 	try {
 		logger.info("Saving synchronized config");
 		logger.debug(`Config is ${JSON.stringify(config)}`);
