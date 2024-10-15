@@ -1,5 +1,6 @@
 .palantir-checkbox {
   appearance: none;
+  cursor: pointer;
   display: inline-block;
   border-radius: var(--theme-border-radius-50);
   border: var(--theme-border-width-100) var(--theme-color-text-100) solid;
@@ -12,6 +13,7 @@
   }
 
   &:disabled {
+    cursor: default;
     border-color: var(--theme-color-background-disabled);
 
     &:checked {
