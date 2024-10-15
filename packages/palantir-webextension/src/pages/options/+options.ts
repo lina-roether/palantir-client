@@ -3,13 +3,13 @@ import { getConfig, setConfig } from "../../config";
 import { assertTypedElement } from "../../utils/query";
 import { FormMode, initForm } from "../../utils/form";
 
-const cancelButton = assertTypedElement("#options__cancel", HTMLButtonElement);
 const useApiKeyInput = assertTypedElement("#options__use-api-key", HTMLInputElement);
 const apiKeyInput = assertTypedElement("#options__api-key", HTMLInputElement);
 
-const form = initForm({
+initForm({
 	query: "#options__form",
 	mode: FormMode.EDIT,
+	resetButton: "#options__reset",
 	onSubmit,
 	fields: {
 		serverUrl: {
@@ -25,11 +25,6 @@ const form = initForm({
 		}
 	}
 })
-
-cancelButton.addEventListener("click", (evt) => {
-	evt.preventDefault();
-	void form.reset();
-});
 
 
 function updateApiKeyInput() {

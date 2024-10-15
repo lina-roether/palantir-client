@@ -20,6 +20,7 @@ export interface FormOptions<F extends string> {
 	query: string;
 	mode?: FormMode;
 	onSubmit?: (data: FormData) => void;
+	resetButton?: string;
 	fields: Partial<Record<F, FormFieldOptions>>;
 }
 
@@ -82,7 +83,12 @@ export function initForm<F extends string>(options: FormOptions<F>, rootElem: El
 	}
 
 	const submitElements = form.querySelectorAll(`input[type="submit"], button[type="submit"]`);
+	const resetElements = options.resetButton ? form.querySelectorAll(options.resetButton) : undefined;
 	const validationState: Record<string, FieldValidationState> = {};
+
+	for (const resetButton of resetElements ?? []) {
+		if (resetButton instanceof HTMLButtonElement) resetButton.addEventListener("click", () => void reset());
+	}
 
 	function computeCanSubmit() {
 		const isValid = Object.values(validationState).every((state) => state.valid);
@@ -96,11 +102,24 @@ export function initForm<F extends string>(options: FormOptions<F>, rootElem: El
 		return true;
 	}
 
-	function setSubmitButtonState() {
+	function computeCanReset() {
+		if (options.mode === FormMode.EDIT) {
+			const isChanged = Object.values(validationState).some((state) => state.changed);
+			if (isChanged) return true;
+		}
+		return false;
+	}
+
+	function setFormButtonsState() {
+		const canReset = computeCanReset();
 		const canSubmit = computeCanSubmit();
 		for (const submitButton of submitElements) {
-			if (!(submitButton instanceof HTMLButtonElement) || !(submitButton instanceof HTMLInputElement)) continue;
+			if (!(submitButton instanceof HTMLButtonElement) && !(submitButton instanceof HTMLInputElement)) continue;
 			submitButton.disabled = !canSubmit;
+		}
+		for (const resetButton of resetElements ?? []) {
+			if (!(resetButton instanceof HTMLButtonElement)) continue;
+			resetButton.disabled = !canReset;
 		}
 	}
 
@@ -137,7 +156,7 @@ export function initForm<F extends string>(options: FormOptions<F>, rootElem: El
 			changed,
 			valid
 		}
-		setSubmitButtonState();
+		setFormButtonsState();
 	}
 
 	async function updateAllFields() {
@@ -186,7 +205,7 @@ export function initForm<F extends string>(options: FormOptions<F>, rootElem: El
 	// initial setup
 	void reset()
 		.then(() => updateAllFields())
-		.then(() => { setSubmitButtonState() });
+		.then(() => { setFormButtonsState() });
 	setFieldChangeListeners();
 
 	return { set, reset };
