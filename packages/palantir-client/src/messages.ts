@@ -1,7 +1,7 @@
 import * as z from "zod";
 import * as msgpack from "@msgpack/msgpack";
 import log from "@just-log/core";
-import { TypedEventTarget } from "./utils";
+import { TypedEvent, TypedEventTarget } from "./utils";
 
 const logger = log.sub("messages");
 
@@ -101,21 +101,20 @@ const MessageMetaSchema = z.object({
 const MessageSchema = MessageMetaSchema.and(MessageBodySchema);
 type Message = z.infer<typeof MessageSchema>;
 
-export class MessageEvent extends Event {
+export class MessageEvent extends TypedEvent<"message"> {
 	constructor(public message: Message) {
 		super("message");
 	}
 }
 
 export interface MessageChannelEventMap {
-	"close": Event,
-	"open": Event,
+	"closed": TypedEvent<"closed">,
+	"open": TypedEvent<"open">,
 	"message": MessageEvent
 }
 
 export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 	private ws: WebSocket;
-	private open = true;
 
 	constructor(url: URL | string) {
 		super();
@@ -136,22 +135,24 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 			logger.error("Websocket disconnected due to an error.");
 			this.onClosed();
 		});
+		this.ws.addEventListener("open", () => {
+			this.onOpen();
+		});
 		this.ws.addEventListener("close", () => {
 			this.onClosed();
 		});
-	}
-
-	public isOpen(): boolean {
-		return this.open;
 	}
 
 	public close() {
 		this.ws.close();
 	}
 
+	private onOpen() {
+		this.dispatchEvent(new TypedEvent("open"));
+	}
+
 	private onClosed() {
-		this.open = false;
-		this.dispatchEvent(new Event("closed"));
+		this.dispatchEvent(new TypedEvent("closed"));
 	}
 
 	public send(body: MessageBody): void {
