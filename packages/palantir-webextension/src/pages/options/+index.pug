@@ -7,6 +7,12 @@ block append head
 block content
   +palantir-card("Settings")(class="options__wrapper")
     form(id="options__form")
+      h1(class="heading-100") Profile
+      +palantir-input-row("options__username", "Username")
+        +palantir-text-field()(id="options__username" name="username")
+
+      +palantir-divider()
+
       h2(class="heading-100") Server connection
       +palantir-input-row("options__server-url", "Server URL")
         +palantir-text-field()(id="options__server-url" name="serverUrl")
@@ -14,6 +20,9 @@ block content
         +palantir-checkbox()(id="options__use-api-key" name="useApiKey")
       +palantir-input-row("options__api-key", "API key")
         +palantir-text-field()(id="options__api-key" name="apiKey")
+
+      +palantir-divider()
+
       +palantir-form-actions()
         +palantir-button("primary")(type="submit") Save
         +palantir-button("secondary")(id="options__reset") Reset

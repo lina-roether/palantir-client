@@ -12,6 +12,10 @@ initForm({
 	resetButton: "#options__reset",
 	onSubmit,
 	fields: {
+		username: {
+			value: async () => (await getConfig()).username ?? "",
+			validate: validateUsername
+		},
 		serverUrl: {
 			value: async () => (await getConfig()).serverUrl ?? "",
 			validate: validateServerUrl
@@ -29,6 +33,16 @@ initForm({
 
 function updateApiKeyInput() {
 	apiKeyInput.disabled = !useApiKeyInput.checked;
+}
+
+function validateUsername(value: FormDataEntryValue | null) {
+	if (typeof value !== "string") {
+		return "Only text input is allowed";
+	}
+	if (!value) return "Please enter a username";
+	if (value.length < 3) return "Username must have at least 3 characters";
+	if (value.length > 100) return "Username cannot have more than 100 characters";
+	return "";
 }
 
 function validateServerUrl(value: FormDataEntryValue | null) {
@@ -53,12 +67,13 @@ function validateApiKey(value: FormDataEntryValue | null) {
 }
 
 function onSubmit(data: FormData) {
+	const username = (data.get("username") ?? "") as string;
 	const serverUrl = (data.get("serverUrl") ?? "") as string;
 	const useApiKey = !!data.get("useApiKey");
 	const apiKey = (data.get("apiKey") ?? "") as string;
 
 
-	setConfig({ serverUrl, apiKey: useApiKey ? apiKey : undefined })
+	setConfig({ username, serverUrl, apiKey: useApiKey ? apiKey : undefined })
 		.catch((err: unknown) => { log.error(`Failed to set config: ${err?.toString() ?? "unknown error"}`); });
 }
 

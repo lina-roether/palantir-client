@@ -4,6 +4,7 @@ import * as z from "zod";
 const logger = log.sub("config");
 
 const ConfigSchema = z.object({
+	username: z.string().optional(),
 	serverUrl: z.string().url().optional(),
 	apiKey: z.string().optional()
 })
