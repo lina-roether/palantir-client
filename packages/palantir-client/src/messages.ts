@@ -99,7 +99,7 @@ const MessageMetaSchema = z.object({
 });
 
 const MessageSchema = MessageMetaSchema.and(MessageBodySchema);
-type Message = z.infer<typeof MessageSchema>;
+export type Message = z.infer<typeof MessageSchema>;
 
 export class MessageEvent extends TypedEvent<"message"> {
 	constructor(public message: Message) {
@@ -132,13 +132,15 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 			}
 		});
 		this.ws.addEventListener("error", () => {
-			logger.error("Websocket disconnected due to an error.");
+			logger.error(`Websocket disconnected from ${this.getUrl()} due to an error.`);
 			this.onClosed();
 		});
 		this.ws.addEventListener("open", () => {
+			logger.debug(`Websocket connected to ${this.getUrl()}`);
 			this.onOpen();
 		});
 		this.ws.addEventListener("close", () => {
+			logger.debug(`Websocket disconnected from ${this.getUrl()}`);
 			this.onClosed();
 		});
 	}
@@ -161,6 +163,10 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 		} catch (e) {
 			logger.error(`Failed to send message: ${e?.toString() ?? "unknown error"}`);
 		}
+	}
+
+	public getUrl(): string {
+		return this.ws.url;
 	}
 
 	private encodeMessage(body: MessageBody): Uint8Array {
