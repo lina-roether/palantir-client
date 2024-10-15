@@ -1,6 +1,7 @@
 import log from "@just-log/core";
 import { getConfig, setConfig } from "../../config";
-import { assertTypedElement, FormMode, initForm } from "../../utils";
+import { assertTypedElement } from "../../utils/query";
+import { FormMode, initForm } from "../../utils/form";
 
 const cancelButton = assertTypedElement("#options__cancel", HTMLButtonElement);
 const useApiKeyInput = assertTypedElement("#options__use-api-key", HTMLInputElement);

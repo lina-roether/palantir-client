@@ -1,4 +1,5 @@
-import { assertTypedElement, initComponent } from "../../utils";
+import { initComponent } from "../../utils/component";
+import { assertTypedElement } from "../../utils/query";
 
 function init(elem: HTMLElement) {
 	const input = elem.querySelector("input");
