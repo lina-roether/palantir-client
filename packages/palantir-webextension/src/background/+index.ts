@@ -1,8 +1,9 @@
 import * as z from "zod";
 import initLogWriter from "@just-log/browser";
-import { Session, type SessionOptions } from "palantir-client";
+import { Session, type RoomInit, type SessionOptions, type SessionState, type UpdateEvent } from "palantir-client";
 import { getOptions, invalidateCachedOptions } from "../options";
 import { backgroundLogger } from "./logger";
+import { MessageSchema, type Message } from "../messages";
 
 initLogWriter();
 
@@ -10,25 +11,32 @@ const logger = backgroundLogger;
 
 logger.info("Background script started");
 
-type SessionStatus =
-	| { status: "active", session: Session }
-	| { status: "inactive" }
-	| { status: "error", message: string };
+let session: Session | null = null;
 
-let sessionStatus: SessionStatus = { status: "inactive" };
+const events = new EventTarget();
 
 function startSession(options: SessionOptions) {
 	logger.info("Starting new session");
 	stopSession("Superseded by another session");
-	const session = new Session(options);
-	sessionStatus = { status: "active", session };
+	session = new Session(options);
+	session.addEventListener("update", onSessionUpdate);
 }
 
 function stopSession(message: string) {
-	if (sessionStatus.status == "active") {
-		logger.info(`Stopping current session: ${message}`);
-		sessionStatus.session.close(message);
-	}
+	if (!session) return;
+	logger.info(`Stopping current session: ${message}`);
+	session.close(message);
+}
+
+function onSessionUpdate() {
+	events.dispatchEvent(new Event("update"));
+}
+
+function sendError(message: string) {
+	logger.error(`Session error: ${message}`);
+	events.dispatchEvent(new CustomEvent("error", {
+		detail: message
+	}))
 }
 
 async function startSessionFromOptions() {
@@ -36,10 +44,7 @@ async function startSessionFromOptions() {
 
 	if (!options.username || !options.serverUrl) {
 		logger.error("Failed to start session: Options is incomplete");
-		sessionStatus = {
-			status: "error",
-			message: "Incomplete options. Please use the extension options page to make sure you have a valid server URL and username set."
-		};
+		sendError("Incomplete options. Please use the extension options page to make sure you have a valid server URL and username set.");
 		return;
 	}
 
@@ -50,30 +55,108 @@ async function startSessionFromOptions() {
 	})
 }
 
+async function tryEnsureSession() {
+	if (!session) await startSessionFromOptions();
+}
 
-const OptionsChangedRequestSchema = z.object({
-	type: z.literal("options_changed")
-});
+function getSessionState(): SessionState {
+	if (!session) return { inRoom: false };
+	return session.getState();
+}
 
-const SessionStatusRequestSchema = z.object({
-	type: z.literal("session_status")
-});
+async function createRoom(init: RoomInit) {
+	await tryEnsureSession();
+	if (!session) return;
 
-const StartSessionRequestSchema = z.object({
-	type: z.literal("start_session")
-});
+	try {
+		session.createRoom(init);
+	} catch (e) {
+		sendError(`Failed to create room: ${e?.toString() ?? "unknown error"}`);
+		session = null;
+	}
+}
 
-const StopSessionRequestSchema = z.object({
-	type: z.literal("stop_session"),
-	reason: z.string()
-});
+async function joinRoom(id: string, password: string) {
+	await tryEnsureSession();
+	if (!session) return;
 
-const RequestSchema = z.union([OptionsChangedRequestSchema, StartSessionRequestSchema, SessionStatusRequestSchema, StopSessionRequestSchema]);
+	try {
+		session.joinRoom(id, password);
+	} catch (e) {
+		sendError(`Failed to join room: ${e?.toString() ?? "unknown error"}`);
+		session = null;
+	}
+}
 
-browser.runtime.onMessage.addListener((rawMsg, _sender, sendResponse) => {
+function leaveRoom() {
+	try {
+		session?.leaveRoom();
+	} catch (e) {
+		sendError(`Failed to leave room: ${e?.toString() ?? "unknown error"}`);
+		session = null;
+	}
+}
+
+function postSessionState(port: browser.runtime.Port) {
+	port.postMessage({ type: "session_state", ...getSessionState() } as Message);
+}
+
+function postSessionError(port: browser.runtime.Port, message: string) {
+	port.postMessage({ type: "session_error", message } as Message);
+
+}
+
+browser.runtime.onConnect.addListener((port) => {
+	logger.debug(`Received port connection: '${port.name}'`);
+
+	const updateListener = () => {
+		postSessionState(port);
+	}
+	const errorListener = (evt: CustomEvent) => {
+		postSessionError(port, evt.detail as string);
+	};
+	events.addEventListener("update", updateListener);
+	events.addEventListener("error", errorListener as EventListener);
+
+
+	port.onDisconnect.addListener(() => {
+		logger.debug(`Port '${port.name}' disconnected`);
+		events.removeEventListener("update", updateListener);
+		events.removeEventListener("error", errorListener as EventListener);
+	});
+
+	port.onMessage.addListener((rawMsg) => {
+		let message;
+		try {
+			message = MessageSchema.parse(rawMsg);
+		} catch (e) {
+			logger.error(`Received invalid message from port '${port.name}': ${e?.toString() ?? "Unknown error"}`);
+			return;
+		}
+		logger.debug(`Received message from port '${port.name}': ${JSON.stringify(message)}`)
+		switch (message.type) {
+			case "join_room":
+				void joinRoom(message.id, message.password);
+				break;
+			case "create_room":
+				void createRoom({
+					name: message.name,
+					password: message.password
+				});
+				break;
+			case "leave_room":
+				leaveRoom();
+				break;
+			default:
+				logger.warning(`Received unexpected message from port '${port.name}': ${message.type}`);
+		}
+	})
+})
+
+browser.runtime.onMessage.addListener((rawMsg) => {
 	let message;
 	try {
-		message = RequestSchema.parse(rawMsg);
+		message = MessageSchema.parse(rawMsg);
 	} catch (e) {
 		logger.error(`Received invalid message: ${e?.toString() ?? "Unknown error"}`);
 		return;
@@ -83,13 +166,7 @@ browser.runtime.onMessage.addListener((rawMsg, _sender, sendResponse) => {
 		case "options_changed":
 			invalidateCachedOptions();
 			break;
-		case "start_session":
-			void startSessionFromOptions();
-			break;
-		case "session_status":
-			sendResponse(sessionStatus);
-			break;
-		case "stop_session":
-			stopSession(message.reason)
+		default:
+			logger.warning(`Recieved unexpected message: ${message.type}`);
 	}
 })

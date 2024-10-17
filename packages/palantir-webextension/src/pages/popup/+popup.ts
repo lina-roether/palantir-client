@@ -2,6 +2,7 @@ import { getOptions } from "../../options";
 import { baseLogger } from "../../logger";
 import { initComponent } from "../../utils/component";
 import { initStateContainer } from "../../utils/state";
+import type { Message } from "../../messages";
 
 const logger = baseLogger.sub("page", "popup");
 
@@ -26,6 +27,7 @@ async function setInitialState() {
 
 void setInitialState();
 
+const port = browser.runtime.connect({ name: "popup" });
 
 initComponent(".js_popup__open-options", HTMLButtonElement, (button) => {
 	button.addEventListener("click", () => {
@@ -38,6 +40,6 @@ initComponent(".js_popup__open-options", HTMLButtonElement, (button) => {
 initComponent(".js_popup__start-session", HTMLButtonElement, (button) => {
 	button.addEventListener("click", () => {
 		logger.debug("Attempting to start session...");
-		void browser.runtime.sendMessage({ type: "start_session" });
+		port.postMessage({ type: "create_room", name: "Test Room", password: "123" } as Message);
 	});
 });
