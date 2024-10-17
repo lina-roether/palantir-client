@@ -1,7 +1,7 @@
-import log from "@just-log/core";
+import { baseLogger } from "../logger";
 import { assertTypedElement } from "./query";
 
-const logger = log.sub("utils", "form");
+const logger = baseLogger.sub("utils", "form");
 
 
 export const enum FormMode {

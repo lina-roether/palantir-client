@@ -1,6 +1,6 @@
-import log from "@just-log/core";
+import { baseLogger } from "../logger";
 
-const logger = log.sub("utils", "component");
+const logger = baseLogger.sub("utils", "component");
 
 export function initComponent<E extends Element>(query: string, runtimeType: new () => E, handler: (elem: E) => void, cleanup?: (elem: E) => void) {
 	const initialElems = document.querySelectorAll(query);

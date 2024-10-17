@@ -1,7 +1,11 @@
 import * as z from "zod";
+import initLogWriter from "@just-log/browser";
 import { Session, type SessionOptions } from "palantir-client";
 import { getConfig } from "./config";
+import { baseLogger } from "./logger";
 
+initLogWriter();
+const logger = baseLogger.sub("background");
 type SessionStatus =
 | { status: "active", session: Session }
 | { status: "inactive" }

@@ -1,7 +1,7 @@
-import log from "@just-log/core";
 import * as z from "zod";
+import { baseLogger } from "./logger";
 
-const logger = log.sub("config");
+const logger = baseLogger.sub("config");
 
 const ConfigSchema = z.object({
 	username: z.string().optional(),

@@ -1,8 +1,9 @@
-import log from "@just-log/core";
 import { getConfig, setConfig } from "../../config";
 import { assertTypedElement } from "../../utils/query";
 import { FormMode, initForm } from "../../utils/form";
+import { baseLogger } from "../../logger";
 
+const logger = baseLogger.sub("page", "options");
 const useApiKeyInput = assertTypedElement("#options__use-api-key", HTMLInputElement);
 const apiKeyInput = assertTypedElement("#options__api-key", HTMLInputElement);
 
