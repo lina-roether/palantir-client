@@ -1,4 +1,4 @@
-import {  ConnectionClosedReason, Message, MessageChannel } from "./messages";
+import { Message, MessageBody, MessageChannel, MessageEvent } from "./messages";
 import { TypedEvent, TypedEventTarget } from "./utils";
 import { baseLogger } from "./logger";
 
@@ -13,7 +13,7 @@ const enum ConnectionState {
 }
 
 export class ClosedEvent extends TypedEvent<"closed"> {
-	constructor(public reason: ConnectionClosedReason, public readonly message: string) {
+	constructor(public readonly message: string) {
 		super("closed");
 	}
 }
@@ -28,19 +28,24 @@ interface ConnectionEventMap {
 	"open": TypedEvent<"open">,
 	"closed": ClosedEvent,
 	"error": ErrorEvent,
+	"message": MessageEvent
+
 }
 
 export interface ConnectionOptions {
 	url: string | URL,
 	username: string,
-	apiKey?: string
+	apiKey?: string,
 }
+
+const KEEPALIVE_INTERVAL = 10000;
 
 export class Connection extends TypedEventTarget<ConnectionEventMap> {
 	private readonly channel: MessageChannel;
 	private state: ConnectionState = ConnectionState.INITIAL;
 	private readonly username: string;
 	private readonly apiKey?: string;
+	private keepaliveInterval?: number;
 
 	constructor(options: ConnectionOptions) {
 		super();
@@ -62,10 +67,30 @@ export class Connection extends TypedEventTarget<ConnectionEventMap> {
 		return this.state == ConnectionState.AUTHENTICATED;
 	}
 
-	public close(reason: ConnectionClosedReason, message: string) {
+	public get serverUrl() {
+		return this.channel.getUrl();
+	}
+
+	public send(message: MessageBody) {
+		this.channel.send(message);
+	}
+
+	public close(message: string) {
 		this.channel.close();
 		this.state = ConnectionState.DISCONNECTED;
-		this.dispatchEvent(new ClosedEvent(reason, message));
+		this.dispatchEvent(new ClosedEvent(message));
+	}
+
+	private stopKeepalive() {
+		if (this.keepaliveInterval === undefined) return;
+		clearInterval(this.keepaliveInterval);
+	}
+
+	private startKeepalive() {
+		this.stopKeepalive();
+		this.keepaliveInterval = setInterval(() => {
+			this.send({ m: "connection::keepalive/v1" });
+		}, KEEPALIVE_INTERVAL);
 	}
 
 	private onChannelOpen() {
@@ -73,9 +98,14 @@ export class Connection extends TypedEventTarget<ConnectionEventMap> {
 		this.authenticate();
 	}
 
+	private onAuthenticated() {
+		this.dispatchEvent(new TypedEvent("open"));
+		this.startKeepalive();
+	}
+
 	private onChannelClosed() {
 		if (this.state == ConnectionState.DISCONNECTED) return;
-		this.close("unknown", "Connection lost");
+		this.close("Connection lost");
 	}
 
 	private onChannelMessage(message: Message) {
@@ -123,7 +153,7 @@ export class Connection extends TypedEventTarget<ConnectionEventMap> {
 				this.channel.send({ m: "connection::pong/v1" });
 				return true;
 			case "connection::closed/v1":
-				this.close(message.reason, message.message);
+				this.close(message.message);
 				return true;
 			default:
 				return false;
@@ -134,13 +164,13 @@ export class Connection extends TypedEventTarget<ConnectionEventMap> {
 		if (message.m == "connection::login_ack/v1") {
 			logger.info(`Successfully logged in as ${this.username} on ${this.channel.getUrl()}`);
 			this.state = ConnectionState.AUTHENTICATED;
-			this.dispatchEvent(new TypedEvent("open"));
 		} else {
 			logger.warning(`Received unexpected message ${message.m}; expected connection::login_ack/v1`);
 		}
 	}
 
 	private handleMessage(message: Message) {
-		// TODO
+		if (message.m.startsWith("connection::")) return;
+		this.dispatchEvent(new MessageEvent(message));
 	}
 }
