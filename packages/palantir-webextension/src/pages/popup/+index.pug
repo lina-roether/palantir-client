@@ -5,8 +5,16 @@ block append head
   title Palantir
 
 block content
-  +palantir-card("Settings")
-    +palantir-button("primary")(id="popup__start-session-button") Start session
+  +palantir-card("Palantir")
+    div(id="popup__content")
+  template(id="popup__template-options-incomplete")
+    p(class="copy-100")
+      | Your configuration is incomplete. Please open the options page
+      | and add all missing fields.
+    +palantir-button("primary")(class="popup__button js_popup__open-options")
+  template(id="popup__template-start-session")
+    +palantir-button("secondary")(class="popup__button js_popup__open-options")
+    +palantir-button("primary")(class="popup__button js_popup__start-session") Start session
 
 block append scripts
   script(src=include("pages/popup/+popup.ts"))
