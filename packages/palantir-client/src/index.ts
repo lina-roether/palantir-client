@@ -1,9 +1,12 @@
 import { Message, MessageBody } from "./messages";
-import { Session, SessionOptions } from "./session";
+import { RoomInit, Session, SessionOptions, SessionState, UpdateEvent } from "./session";
 
 export {
 	Message,
 	MessageBody,
 	Session,
-	SessionOptions
+	SessionOptions,
+	SessionState,
+	RoomInit,
+	UpdateEvent,
 }
