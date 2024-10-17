@@ -144,6 +144,12 @@ async function buildTypescript(bundle, context) {
 		sourcemap: context.environment === "debug",
 		format: "iife",
 		minify: context.environment === "prod",
+		define: {
+			"import.meta.env": JSON.stringify({
+				target: context.target,
+				environment: context.environment
+			})
+		}
 	})
 }
 
@@ -202,7 +208,7 @@ async function buildJsonEsm(bundle, context) {
 async function build(bundle, globalContext, config) {
 	const exclude = config.exclude ?? [];
 	if (exclude.includes(bundle.srcName)) {
-		logger.info(`${bundle.srcName} is excluded for this build`);
+		logger.debug(`${bundle.srcName} is excluded for this build`);
 		return;
 	}
 	const context = createBundleContext(globalContext, bundle);
