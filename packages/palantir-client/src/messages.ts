@@ -1,9 +1,9 @@
 import * as z from "zod";
 import * as msgpack from "@msgpack/msgpack";
-import log from "@just-log/core";
 import { TypedEvent, TypedEventTarget } from "./utils";
+import { baseLogger } from "./logger";
 
-const logger = log.sub("messages");
+const logger = baseLogger.sub("messages");
 
 const ConnectionLoginMsgBodySchema = z.object({
 	username: z.string(),

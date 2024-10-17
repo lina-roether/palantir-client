@@ -1,8 +1,8 @@
-import log from "@just-log/core";
 import {  ConnectionClosedReason, Message, MessageChannel } from "./messages";
 import { TypedEvent, TypedEventTarget } from "./utils";
+import { baseLogger } from "./logger";
 
-const logger = log.sub("connection");
+const logger = baseLogger.sub("connection");
 
 const enum ConnectionState {
 	INITIAL,
