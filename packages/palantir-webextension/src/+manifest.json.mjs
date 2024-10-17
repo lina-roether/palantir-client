@@ -1,27 +1,19 @@
 const EXTENSION_ID = "{cbaa7c2d-7a63-4d10-bcca-1de052432aa0}";
 
-const NAME_MAP = {
-	"prod": "Palantir",
-	"debug": "Palantir (DEBUG)"
+function per_environment(context, map) {
+	return map[context.environment];
 }
 
-const CONTENT_SECURITY_POLICY_MAP = {
-	"prod": "default-src 'self'; upgrade-insecure-requests;",
-	"debug": "default-src 'self';"
-}
-
-const BROWSER_SPECIFIC_SETTINGS_MAP = {
-	"firefox": {
-		gecko: {
-			id: EXTENSION_ID
-		}
-	},
-	"chromium": undefined
+function per_target(context, map) {
+	return map[context.target];
 }
 
 export default (context) => ({
 	manifest_version: 3,
-	name: NAME_MAP[context.environment],
+	name: per_environment(context, {
+		prod: "Palantir",
+		debug: "Palantir (DEBUG)"
+	}),
 	version: context.version,
 	description: "A browser extension to watch videos together remotely on any website",
 	icons: {
@@ -30,9 +22,18 @@ export default (context) => ({
 	},
 	permissions: ["tabs", "storage"],
 	content_security_policy: {
-		extension_pages: CONTENT_SECURITY_POLICY_MAP[context.environment]
+		extension_pages: per_environment(context, {
+			prod: "default-src 'self'; upgrade-insecure-requests;",
+			debug: "default-src 'self';"
+		})
 	},
-	browser_specific_settings: BROWSER_SPECIFIC_SETTINGS_MAP[context.target],
+	browser_specific_settings: per_target(context, {
+		firefox: {
+			gecko: {
+				id: EXTENSION_ID
+			}
+		}
+	}),
 	options_ui: {
 		page: context.include("pages/options/+index.pug")
 	}
