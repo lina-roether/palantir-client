@@ -36,5 +36,13 @@ export default (context) => ({
 	}),
 	options_ui: {
 		page: context.include("pages/options/+index.pug")
-	}
+	},
+	background: per_target(context, {
+		firefox: {
+			scripts: [context.include("+background.ts")]
+		},
+		chromium: {
+			service_worker: context.include("+background.ts")
+		}
+	})
 })
