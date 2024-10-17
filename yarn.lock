@@ -1636,7 +1636,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"palantir-client@workspace:packages/palantir-client":
+"palantir-client@workspace:^, palantir-client@workspace:packages/palantir-client":
   version: 0.0.0-use.local
   resolution: "palantir-client@workspace:packages/palantir-client"
   dependencies:
@@ -1659,6 +1659,7 @@ __metadata:
     "@types/pug": "npm:^2.0.10"
     esbuild: "npm:^0.24.0"
     listr2: "npm:^8.2.5"
+    palantir-client: "workspace:^"
     pug: "npm:^3.0.3"
     sass: "npm:^1.79.4"
     tslib: "npm:^2.7.0"

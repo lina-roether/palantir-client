@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@just-log/browser": "^0.1.2",
 		"@just-log/core": "^0.1.2",
+		"palantir-client": "workspace:^",
 		"tslib": "^2.7.0",
 		"zod": "^3.23.8"
 	},
