@@ -13,7 +13,6 @@ export function initComponent<E extends Element>(query: string, runtimeType: new
 	}
 
 	const observer = new MutationObserver((records) => {
-		console.log(records);
 		for (const record of records) {
 			for (const addedNode of record.addedNodes) {
 				if (!(addedNode instanceof Element)) continue;
