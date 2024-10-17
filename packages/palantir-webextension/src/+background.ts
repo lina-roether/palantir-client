@@ -12,9 +12,9 @@ const logger = baseLogger.sub("background");
 logger.info("Background script started");
 
 type SessionStatus =
-| { status: "active", session: Session }
-| { status: "inactive" }
-| { status: "error", message: string };
+	| { status: "active", session: Session }
+	| { status: "inactive" }
+	| { status: "error", message: string };
 
 let sessionStatus: SessionStatus = { status: "inactive" };
 
@@ -75,7 +75,7 @@ browser.runtime.onMessage.addListener((rawMsg, _sender, sendResponse) => {
 	let message;
 	try {
 		message = RequestSchema.parse(rawMsg);
-	} catch(e) {
+	} catch (e) {
 		logger.error(`Received invalid message: ${e?.toString() ?? "Unknown error"}`);
 		return;
 	}
