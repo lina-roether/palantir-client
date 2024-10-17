@@ -13,27 +13,33 @@ export function initComponent<E extends Element>(query: string, runtimeType: new
 	}
 
 	const observer = new MutationObserver((records) => {
+		console.log(records);
 		for (const record of records) {
 			for (const addedNode of record.addedNodes) {
 				if (!(addedNode instanceof Element)) continue;
-				if (!addedNode.matches(query)) continue;
-				if (!(addedNode instanceof runtimeType)) {
-					logger.error(`Component query '${query}' matched element not of expected type ${runtimeType.name}`);
-					continue;
+
+				const addedComponents = addedNode.querySelectorAll(query);
+				for (const addedComponent of addedComponents) {
+					if (!(addedComponent instanceof runtimeType)) {
+						logger.error(`Component query '${query}' matched element not of expected type ${runtimeType.name}`);
+						continue;
+					}
+					handler(addedComponent);
 				}
-				handler(addedNode);
 			}
 			if (!cleanup) return;
 			for (const removedNode of record.removedNodes) {
 				if (!(removedNode instanceof Element)) continue;
-				if (!removedNode.matches(query)) continue;
-				if (!(removedNode instanceof Element)) continue;
-				if (!removedNode.matches(query)) continue;
-				if (!(removedNode instanceof runtimeType)) {
-					logger.error(`Component query '${query}' matched element not of expected type ${runtimeType.name}`);
-					continue;
+
+				const removedComponents = removedNode.querySelectorAll(query);
+				for (const removedComponent of removedComponents) {
+					if (!(removedComponent instanceof Element)) continue;
+					if (!(removedComponent instanceof runtimeType)) {
+						logger.error(`Component query '${query}' matched element not of expected type ${runtimeType.name}`);
+						continue;
+					}
+					cleanup(removedComponent);
 				}
-				cleanup(removedNode);
 			}
 		}
 	});
