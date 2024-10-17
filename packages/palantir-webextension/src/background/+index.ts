@@ -1,13 +1,12 @@
 import * as z from "zod";
 import initLogWriter from "@just-log/browser";
 import { Session, type SessionOptions } from "palantir-client";
-import { getConfig, invalidateCachedConfig } from "./config";
-import { baseLogger } from "./logger";
-import "./+webextension-polyfill.mjs";
+import { getConfig, invalidateCachedConfig } from "../config";
+import { backgroundLogger } from "./logger";
 
 initLogWriter();
 
-const logger = baseLogger.sub("background");
+const logger = backgroundLogger;
 
 logger.info("Background script started");
 

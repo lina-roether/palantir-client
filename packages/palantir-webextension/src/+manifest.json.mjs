@@ -48,10 +48,10 @@ export default (context) => ({
 	},
 	background: per_target(context, {
 		firefox: {
-			scripts: [context.include("+background.ts")]
+			scripts: [context.include("background/+index.ts")]
 		},
 		chromium: {
-			service_worker: context.include("+background.ts")
+			service_worker: context.include("background/+polyfilled.ts")
 		}
 	})
 })
