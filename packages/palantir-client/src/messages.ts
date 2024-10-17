@@ -120,16 +120,7 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 		super();
 		this.ws = new WebSocket(url);
 		this.ws.addEventListener("message", (evt) => {
-			try {
-				if (!(evt.data instanceof Uint8Array)) {
-					logger.error(`Expected to receive a Uint8Array, but got ${(evt.data as unknown)?.constructor.name ?? typeof evt.data}`);
-					return;
-				}
-				const message = this.decodeMessage(evt.data);
-				this.dispatchEvent(new MessageEvent(message));
-			} catch (e) {
-				logger.error(`Failed to decode received message: ${e?.toString() ?? "unknown error"}`);
-			}
+			void this.onMessage(evt.data);
 		});
 		this.ws.addEventListener("error", () => {
 			logger.error(`Websocket disconnected from ${this.getUrl()} due to an error.`);
@@ -167,6 +158,25 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 
 	public getUrl(): string {
 		return this.ws.url;
+	}
+
+	private async onMessage(data: unknown) {
+		try {
+			let dataBuffer;
+			if (data instanceof Uint8Array) {
+				dataBuffer = data;
+			} else if (data instanceof Blob) {
+				dataBuffer = new Uint8Array(await data.arrayBuffer());
+			} else {
+				logger.error(`Received data of unexpected type ${data?.constructor?.name ?? typeof data}`);
+				return;
+			}
+
+			const message = this.decodeMessage(dataBuffer);
+			this.dispatchEvent(new MessageEvent(message));
+		} catch (e) {
+			logger.error(`Failed to decode received message: ${e?.toString() ?? "unknown error"}`);
+		}
 	}
 
 	private encodeMessage(body: MessageBody): Uint8Array {
