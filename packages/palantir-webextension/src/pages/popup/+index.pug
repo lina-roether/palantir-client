@@ -1,0 +1,12 @@
+extends ../layout.pug
+
+block append head
+  link(rel="stylesheet" href=include("pages/popup/+styles.scss"))
+  title Palantir
+
+block content
+  +palantir-card("Settings")
+    +palantir-button("primary")(id="popup__start-session-button") Start session
+
+block append scripts
+  script(src=include("pages/popup/+popup.ts"))

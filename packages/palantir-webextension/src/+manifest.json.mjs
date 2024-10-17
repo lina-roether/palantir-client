@@ -34,6 +34,15 @@ export default (context) => ({
 			}
 		}
 	}),
+	action: {
+		default_icon: {
+			"16": context.asset("images/icon-16.png"),
+			"24": context.asset("images/icon-24.png"),
+			"48": context.asset("images/icon-48.png")
+		},
+		default_title: "Palantir",
+		default_popup: context.include("pages/popup/+index.pug"),
+	},
 	options_ui: {
 		page: context.include("pages/options/+index.pug")
 	},
