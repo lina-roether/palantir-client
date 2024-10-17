@@ -1,7 +1,7 @@
 import * as z from "zod";
 import initLogWriter from "@just-log/browser";
 import { Session, type SessionOptions } from "palantir-client";
-import { getConfig } from "./config";
+import { getConfig, invalidateCachedConfig } from "./config";
 import { baseLogger } from "./logger";
 
 initLogWriter();
@@ -64,7 +64,7 @@ browser.runtime.onMessage.addListener((rawMsg, _sender, sendResponse) => {
 	const message = RequestSchema.parse(rawMsg);
 	switch (message.type) {
 		case "config_changed":
-			void startSessionFromConfig()
+			invalidateCachedConfig();
 			break;
 		case "session_status":
 			sendResponse(sessionStatus);

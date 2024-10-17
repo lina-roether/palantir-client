@@ -4,6 +4,7 @@ import { FormMode, initForm } from "../../utils/form";
 import { baseLogger } from "../../logger";
 
 const logger = baseLogger.sub("page", "options");
+
 const useApiKeyInput = assertTypedElement("#options__use-api-key", HTMLInputElement);
 const apiKeyInput = assertTypedElement("#options__api-key", HTMLInputElement);
 
@@ -75,7 +76,8 @@ function onSubmit(data: FormData) {
 
 
 	setConfig({ username, serverUrl, apiKey: useApiKey ? apiKey : undefined })
-		.catch((err: unknown) => { log.error(`Failed to set config: ${err?.toString() ?? "unknown error"}`); });
+		.catch((err: unknown) => { logger.error(`Failed to set config: ${err?.toString() ?? "unknown error"}`); });
+	void browser.runtime.sendMessage({ type: "config_changed" });
 }
 
 useApiKeyInput.addEventListener("change", () => {

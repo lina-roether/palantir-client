@@ -53,3 +53,7 @@ export async function setConfig(config: Config): Promise<void> {
 		logger.error(`Failed to access storage API: ${e?.toString() ?? "Unknown Error"} `);
 	}
 }
+
+export function invalidateCachedConfig() {
+	cachedConfig = null;
+}
