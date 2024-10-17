@@ -13,6 +13,10 @@ body {
   box-sizing: border-box;
 }
 
+a {
+  color: var(--theme-color-text-highlighted);
+}
+
 .copy-100 {
   display: block;
   font: var(--theme-font-copy-100);

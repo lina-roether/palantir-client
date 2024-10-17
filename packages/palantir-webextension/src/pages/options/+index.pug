@@ -10,16 +10,30 @@ block content
       h1(class="heading-100") Profile
       +palantir-input-row("options__username", "Username")
         +palantir-text-field()(id="options__username" name="username")
-
+      +palantir-input-row-description()
+        | The name to show other people when connecting to rooms.
+        
       +palantir-divider()
 
       h2(class="heading-100") Server connection
       +palantir-input-row("options__server-url", "Server URL")
         +palantir-text-field()(id="options__server-url" name="serverUrl")
+      +palantir-input-row-description()
+        | The URL of the Palantir server to use. Visit
+        |
+        a(href="https://github.com/niko-roether/palantir-server" target="_blank") the palantir_server github repository
+        |
+        | for instructions for how to host your own server.
+
       +palantir-input-row("options__use-api-key", "Use API key")
         +palantir-checkbox()(id="options__use-api-key" name="useApiKey")
+      +palantir-input-row-description()
+        | If the server you're trying to use isn't public, you will require an API key.
+
       +palantir-input-row("options__api-key", "API key")
         +palantir-text-field()(id="options__api-key" name="apiKey")
+      +palantir-input-row-description()
+        | The API key to use for authenticating to the server specified for 'Server URL'.
 
       +palantir-divider()
 

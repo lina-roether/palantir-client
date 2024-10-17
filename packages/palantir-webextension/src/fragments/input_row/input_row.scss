@@ -42,3 +42,14 @@
     }
   }
 }
+
+.palantir-input-row-description {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: ". content";
+  gap: var(--theme-spacing-150);
+
+  &__content {
+    grid-area: content;
+  }
+}
