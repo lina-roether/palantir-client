@@ -60,8 +60,7 @@ const SessionStatusRequestSchema = z.object({
 });
 
 const StartSessionRequestSchema = z.object({
-	type: z.literal("start_session"),
-	reason: z.string()
+	type: z.literal("start_session")
 });
 
 const StopSessionRequestSchema = z.object({
