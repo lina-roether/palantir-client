@@ -1,8 +1,9 @@
 import { Message, MessageBody } from "./messages";
-import { Session } from "./session";
+import { Session, SessionOptions } from "./session";
 
 export {
 	Message,
 	MessageBody,
 	Session,
+	SessionOptions
 }
