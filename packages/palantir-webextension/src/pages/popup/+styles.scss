@@ -1,5 +1,17 @@
+$popupWidth: 500px;
+
+body {
+  width: $popupWidth;
+}
+
 .popup__button {
   width: 100%;
+}
+
+.popup__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--theme-spacing-150);
 }
 
 #popup__content {

@@ -11,10 +11,12 @@ block content
     p(class="copy-100")
       | Your configuration is incomplete. Please open the options page
       | and add all missing fields.
-    +palantir-button("primary")(class="popup__button js_popup__open-options")
+    div(class="popup__buttons")
+      +palantir-button("primary")(class="popup__button js_popup__open-options") Open options
   template(id="popup__template-start-session")
-    +palantir-button("secondary")(class="popup__button js_popup__open-options")
-    +palantir-button("primary")(class="popup__button js_popup__start-session") Start session
+    div(class="popup__buttons")
+      +palantir-button("secondary")(class="popup__button js_popup__open-options") Open options
+      +palantir-button("primary")(class="popup__button js_popup__start-session") Start session
 
 block append scripts
   script(src=include("pages/popup/+popup.ts"))
