@@ -56,6 +56,8 @@ export interface RoomInit {
 	password: string
 }
 
+const ACK_TIMEOUT = 1000;
+
 export class Session extends TypedEventTarget<SessionEventMap> {
 	private readonly connection: Connection;
 	private roomData: RoomData | null = null;
@@ -121,6 +123,12 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 			password: init.password
 		})
 		this.state = State.CREATING;
+		setTimeout(() => {
+			if (this.state == State.CREATING) {
+				this.state = State.INITIAL;
+				logger.error(`Timed out while creating room`);
+			}
+		}, ACK_TIMEOUT)
 	}
 
 	public joinRoom(id: string, password: string) {
@@ -129,6 +137,12 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		}
 		this.connection.send({ m: "room::join/v1", id, password });
 		this.state = State.JOINING;
+		setTimeout(() => {
+			if (this.state == State.JOINING) {
+				this.state = State.INITIAL;
+				logger.error(`Timed out while joining room`);
+			}
+		}, ACK_TIMEOUT)
 	}
 
 	public leaveRoom() {
@@ -136,6 +150,12 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		this.roomData = null;
 		this.connection.send({ m: "room::leave/v1" });
 		this.state = State.LEAVING;
+		setTimeout(() => {
+			if (this.state == State.LEAVING) {
+				this.state = State.INITIAL;
+				logger.error(`Timed out while leaving room`);
+			}
+		}, ACK_TIMEOUT)
 	}
 
 	public close(message: string) {
