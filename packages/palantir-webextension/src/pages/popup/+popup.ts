@@ -1,4 +1,4 @@
-import { getConfig } from "../../config";
+import { getOptions } from "../../options";
 import { baseLogger } from "../../logger";
 import { initComponent } from "../../utils/component";
 import { initStateContainer } from "../../utils/state";
@@ -6,19 +6,19 @@ import { initStateContainer } from "../../utils/state";
 const logger = baseLogger.sub("page", "popup");
 
 const enum State {
-	INCOMPLETE_CONFIG,
+	INCOMPLETE_OPTIONS,
 	START_SESSION
 }
 
 const stateController = initStateContainer("#popup__content", {
-	[State.INCOMPLETE_CONFIG]: "#popup__template-options-incomplete",
+	[State.INCOMPLETE_OPTIONS]: "#popup__template-options-incomplete",
 	[State.START_SESSION]: "#popup__template-start-session"
 });
 
 async function setInitialState() {
-	const config = await getConfig();
-	if (!config.username || !config.username) {
-		stateController.setState(State.INCOMPLETE_CONFIG);
+	const options = await getOptions();
+	if (!options.username || !options.username) {
+		stateController.setState(State.INCOMPLETE_OPTIONS);
 	} else {
 		stateController.setState(State.START_SESSION)
 	}

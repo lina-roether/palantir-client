@@ -1,7 +1,7 @@
 import * as z from "zod";
 import initLogWriter from "@just-log/browser";
 import { Session, type SessionOptions } from "palantir-client";
-import { getConfig, invalidateCachedConfig } from "../config";
+import { getOptions, invalidateCachedOptions } from "../options";
 import { backgroundLogger } from "./logger";
 
 initLogWriter();
@@ -17,10 +17,10 @@ type SessionStatus =
 
 let sessionStatus: SessionStatus = { status: "inactive" };
 
-function startSession(config: SessionOptions) {
+function startSession(options: SessionOptions) {
 	logger.info("Starting new session");
 	stopSession("Superseded by another session");
-	const session = new Session(config);
+	const session = new Session(options);
 	sessionStatus = { status: "active", session };
 }
 
@@ -31,28 +31,28 @@ function stopSession(message: string) {
 	}
 }
 
-async function startSessionFromConfig() {
-	const config = await getConfig();
+async function startSessionFromOptions() {
+	const options = await getOptions();
 
-	if (!config.username || !config.serverUrl) {
-		logger.error("Failed to start session: Config is incomplete");
+	if (!options.username || !options.serverUrl) {
+		logger.error("Failed to start session: Options is incomplete");
 		sessionStatus = {
 			status: "error",
-			message: "Incomplete configuration. Please use the extension settings and make you have a valid server URL and username set."
+			message: "Incomplete options. Please use the extension options page to make sure you have a valid server URL and username set."
 		};
 		return;
 	}
 
 	startSession({
-		username: config.username,
-		url: config.serverUrl,
-		apiKey: config.apiKey
+		username: options.username,
+		url: options.serverUrl,
+		apiKey: options.apiKey
 	})
 }
 
 
-const ConfigChangedRequestSchema = z.object({
-	type: z.literal("config_changed")
+const OptionsChangedRequestSchema = z.object({
+	type: z.literal("options_changed")
 });
 
 const SessionStatusRequestSchema = z.object({
@@ -68,7 +68,7 @@ const StopSessionRequestSchema = z.object({
 	reason: z.string()
 });
 
-const RequestSchema = z.union([ConfigChangedRequestSchema, StartSessionRequestSchema, SessionStatusRequestSchema, StopSessionRequestSchema]);
+const RequestSchema = z.union([OptionsChangedRequestSchema, StartSessionRequestSchema, SessionStatusRequestSchema, StopSessionRequestSchema]);
 
 browser.runtime.onMessage.addListener((rawMsg, _sender, sendResponse) => {
 	let message;
@@ -80,11 +80,11 @@ browser.runtime.onMessage.addListener((rawMsg, _sender, sendResponse) => {
 	}
 	logger.debug(`Received message: ${JSON.stringify(message)}`)
 	switch (message.type) {
-		case "config_changed":
-			invalidateCachedConfig();
+		case "options_changed":
+			invalidateCachedOptions();
 			break;
 		case "start_session":
-			void startSessionFromConfig();
+			void startSessionFromOptions();
 			break;
 		case "session_status":
 			sendResponse(sessionStatus);

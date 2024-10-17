@@ -1,4 +1,4 @@
-import { getConfig, setConfig } from "../../config";
+import { getOptions, setOptions } from "../../options";
 import { assertTypedElement } from "../../utils/query";
 import { FormMode, initForm } from "../../utils/form";
 import { baseLogger } from "../../logger";
@@ -15,18 +15,18 @@ initForm({
 	onSubmit,
 	fields: {
 		username: {
-			value: async () => (await getConfig()).username ?? "",
+			value: async () => (await getOptions()).username ?? "",
 			validate: validateUsername
 		},
 		serverUrl: {
-			value: async () => (await getConfig()).serverUrl ?? "",
+			value: async () => (await getOptions()).serverUrl ?? "",
 			validate: validateServerUrl
 		},
 		useApiKey: {
-			value: async () => (await getConfig()).apiKey !== undefined,
+			value: async () => (await getOptions()).apiKey !== undefined,
 		},
 		apiKey: {
-			value: async () => (await getConfig()).apiKey ?? "",
+			value: async () => (await getOptions()).apiKey ?? "",
 			validate: validateApiKey
 		}
 	}
@@ -75,9 +75,9 @@ function onSubmit(data: FormData) {
 	const apiKey = (data.get("apiKey") ?? "") as string;
 
 
-	setConfig({ username, serverUrl, apiKey: useApiKey ? apiKey : undefined })
-		.catch((err: unknown) => { logger.error(`Failed to set config: ${err?.toString() ?? "unknown error"}`); });
-	void browser.runtime.sendMessage({ type: "config_changed" });
+	setOptions({ username, serverUrl, apiKey: useApiKey ? apiKey : undefined })
+		.catch((err: unknown) => { logger.error(`Failed to set options: ${err?.toString() ?? "unknown error"}`); });
+	void browser.runtime.sendMessage({ type: "options_changed" });
 }
 
 useApiKeyInput.addEventListener("change", () => {
