@@ -23,8 +23,8 @@ export default (context) => ({
 	permissions: ["tabs", "storage"],
 	content_security_policy: {
 		extension_pages: per_environment(context, {
-			prod: "default-src 'self'; upgrade-insecure-requests;",
-			debug: "default-src 'self';"
+			prod: "default-src 'self'; upgrade-insecure-requests; connect-src ws: wss:",
+			debug: "default-src 'self'; connect-src ws: wss:"
 		})
 	},
 	browser_specific_settings: per_target(context, {
