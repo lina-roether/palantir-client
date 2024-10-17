@@ -3,6 +3,7 @@ import initLogWriter from "@just-log/browser";
 import { Session, type SessionOptions } from "palantir-client";
 import { getConfig, invalidateCachedConfig } from "./config";
 import { baseLogger } from "./logger";
+import "./+webextension-polyfill.mjs";
 
 initLogWriter();
 
