@@ -13,20 +13,20 @@
 		"build:prod": "yarn clean && yarn build:firefox && yarn build:chromium"
 	},
 	"dependencies": {
-		"@just-log/browser": "^0.1.2",
-		"@just-log/core": "^0.1.2",
+		"@just-log/browser": "^0.2.0",
+		"@just-log/core": "^0.2.0",
 		"palantir-client": "workspace:^",
-		"tslib": "^2.7.0",
+		"tslib": "^2.8.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@just-log/node": "^0.1.2",
+		"@just-log/node": "^0.2.0",
 		"@types/firefox-webext-browser": "^120.0.4",
 		"@types/pug": "^2.0.10",
 		"esbuild": "^0.24.0",
 		"listr2": "^8.2.5",
 		"pug": "^3.0.3",
-		"sass": "^1.79.4",
+		"sass": "^1.80.3",
 		"webextension-polyfill": "^0.12.0"
 	}
 }
