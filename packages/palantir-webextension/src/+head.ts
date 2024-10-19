@@ -1,3 +1,1 @@
-import initLogWriter from "@just-log/browser";
-
-initLogWriter();
+import "./log_writer";

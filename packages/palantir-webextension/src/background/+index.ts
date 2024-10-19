@@ -1,10 +1,8 @@
-import initLogWriter from "@just-log/browser";
 import { Session, type RoomInit, type SessionOptions, type SessionState } from "palantir-client";
 import { getOptions, invalidateCachedOptions } from "../options";
 import { backgroundLogger } from "./logger";
 import { MessageSchema, type Message } from "../messages";
-
-initLogWriter();
+import "../log_writer";
 
 const logger = backgroundLogger;
 
