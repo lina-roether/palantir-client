@@ -153,7 +153,7 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 		try {
 			this.ws.send(this.encodeMessage(body));
 		} catch (e) {
-			logger.error(`Failed to send message: ${e?.toString() ?? "unknown error"}`);
+			logger.error(`Failed to send message`, e);
 		}
 	}
 
@@ -176,7 +176,7 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 			const message = this.decodeMessage(dataBuffer);
 			this.dispatchEvent(new MessageEvent(message));
 		} catch (e) {
-			logger.error(`Failed to decode received message: ${e?.toString() ?? "unknown error"}`);
+			logger.error(`Failed to decode received message`, e);
 		}
 	}
 

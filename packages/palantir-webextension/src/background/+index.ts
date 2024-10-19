@@ -3,6 +3,7 @@ import { getOptions, invalidateCachedOptions } from "../options";
 import { backgroundLogger } from "./logger";
 import { MessageSchema, type Message } from "../messages";
 import "../log_writer";
+import { errorMessage } from "../utils/error";
 
 const logger = backgroundLogger;
 
@@ -81,7 +82,7 @@ async function tryEnsureSession() {
 			await waitForSessionOpen();
 		}
 	} catch (e) {
-		logger.error(`Failed to ensure session: ${e?.toString() ?? "unknown error"}`);
+		logger.error(`Failed to ensure session`, e);
 		session?.close("Client error");
 		session = null;
 	}
@@ -100,7 +101,7 @@ async function createRoom(init: RoomInit) {
 	try {
 		session.createRoom(init);
 	} catch (e) {
-		sendError(`Failed to create room: ${e?.toString() ?? "unknown error"}`);
+		sendError(`Failed to create room: ${errorMessage(e)}`);
 		session = null;
 	}
 }
@@ -113,7 +114,7 @@ async function joinRoom(id: string, password: string) {
 	try {
 		session.joinRoom(id, password);
 	} catch (e) {
-		sendError(`Failed to join room: ${e?.toString() ?? "unknown error"}`);
+		sendError(`Failed to join room: ${errorMessage(e)}`);
 		session = null;
 	}
 }
@@ -122,7 +123,7 @@ function leaveRoom() {
 	try {
 		session?.leaveRoom();
 	} catch (e) {
-		sendError(`Failed to leave room: ${e?.toString() ?? "unknown error"}`);
+		sendError(`Failed to leave room: ${errorMessage(e)}`);
 		session = null;
 	}
 }
@@ -160,7 +161,7 @@ browser.runtime.onConnect.addListener((port) => {
 		try {
 			message = MessageSchema.parse(rawMsg);
 		} catch (e) {
-			logger.error(`Received invalid message from port '${port.name}': ${e?.toString() ?? "Unknown error"}`);
+			logger.error(`Received invalid message from port '${port.name}'`, e);
 			return;
 		}
 		logger.debug(`Received message from port '${port.name}': ${JSON.stringify(message)}`)
@@ -188,7 +189,7 @@ browser.runtime.onMessage.addListener((rawMsg) => {
 	try {
 		message = MessageSchema.parse(rawMsg);
 	} catch (e) {
-		logger.error(`Received invalid message: ${e?.toString() ?? "Unknown error"}`);
+		logger.error(`Received invalid message`, e);
 		return;
 	}
 	logger.debug(`Received message: ${JSON.stringify(message)}`)

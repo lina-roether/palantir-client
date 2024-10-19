@@ -23,7 +23,7 @@ async function getOptionsCacheMiss(): Promise<Options> {
 		logger.info("Reading synchronized options");
 		result = await browser.storage.sync.get({ options: DEFAULT_OPTIONS });
 	} catch (e) {
-		logger.error(`Failed to access storage API: ${e?.toString() ?? "Unknown Error"}`);
+		logger.error(`Failed to access storage API`, e);
 		return {};
 	}
 	let options: Options;
@@ -31,7 +31,7 @@ async function getOptionsCacheMiss(): Promise<Options> {
 		options = OptionsSchema.parse(result.options);
 		logger.debug(`Options are ${JSON.stringify(options)}`);
 	} catch (e) {
-		logger.error(`Options are corrupted: ${e?.toString() ?? "Unknown Error"}`);
+		logger.error(`Options are corrupted`, e);
 		options = DEFAULT_OPTIONS;
 	}
 	cachedOptions = options;
@@ -50,7 +50,7 @@ export async function setOptions(options: Options): Promise<void> {
 		logger.debug(`Options are ${JSON.stringify(options)}`);
 		await browser.storage.sync.set({ options });
 	} catch (e) {
-		logger.error(`Failed to access storage API: ${e?.toString() ?? "Unknown Error"} `);
+		logger.error(`Failed to access storage API`, e);
 	}
 }
 

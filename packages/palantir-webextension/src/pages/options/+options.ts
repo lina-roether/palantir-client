@@ -76,7 +76,9 @@ function onSubmit(data: FormData) {
 
 
 	setOptions({ username, serverUrl, apiKey: useApiKey ? apiKey : undefined })
-		.catch((err: unknown) => { logger.error(`Failed to set options: ${err?.toString() ?? "unknown error"}`); });
+		.catch((err: unknown) => {
+			logger.error(`Failed to set options`, err);
+		});
 	void browser.runtime.sendMessage({ type: "options_changed" });
 }
 
