@@ -1,6 +1,5 @@
-import * as z from "zod";
 import initLogWriter from "@just-log/browser";
-import { Session, type RoomInit, type SessionOptions, type SessionState, type UpdateEvent } from "palantir-client";
+import { Session, type RoomInit, type SessionOptions, type SessionState } from "palantir-client";
 import { getOptions, invalidateCachedOptions } from "../options";
 import { backgroundLogger } from "./logger";
 import { MessageSchema, type Message } from "../messages";
@@ -55,8 +54,39 @@ async function startSessionFromOptions() {
 	})
 }
 
+const SESSION_OPEN_TIMEOUT = 3000;
+
+function waitForSessionOpen() {
+	if (!session) return;
+	if (session.open) return;
+	return new Promise((res, rej) => {
+		if (!session) {
+			rej(new Error("Session died while waiting for it to open"));
+			return;
+		}
+		setTimeout(() => {
+			rej(new Error("Timed out waiting for session to open"));
+			return;
+		}, SESSION_OPEN_TIMEOUT);
+		session.addEventListener("open", () => { res(undefined); });
+	});
+}
+
 async function tryEnsureSession() {
-	if (!session) await startSessionFromOptions();
+	try {
+		if (!session) {
+			logger.info("No active session; starting...");
+			await startSessionFromOptions();
+		}
+		if (!session?.open) {
+			logger.info("Session not open, waiting...");
+			await waitForSessionOpen();
+		}
+	} catch (e) {
+		logger.error(`Failed to ensure session: ${e?.toString() ?? "unknown error"}`);
+		session?.close("Client error");
+		session = null;
+	}
 }
 
 function getSessionState(): SessionState {
@@ -65,6 +95,7 @@ function getSessionState(): SessionState {
 }
 
 async function createRoom(init: RoomInit) {
+	logger.debug(`Requesting to create room with name ${init.name}`);
 	await tryEnsureSession();
 	if (!session) return;
 
@@ -77,6 +108,7 @@ async function createRoom(init: RoomInit) {
 }
 
 async function joinRoom(id: string, password: string) {
+	logger.debug(`Requesting to join room with id ${id}`);
 	await tryEnsureSession();
 	if (!session) return;
 
