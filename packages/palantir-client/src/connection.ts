@@ -105,6 +105,7 @@ export class Connection extends TypedEventTarget<ConnectionEventMap> {
 
 	private onChannelClosed() {
 		if (this.state == ConnectionState.DISCONNECTED) return;
+		this.stopKeepalive();
 		this.close("Connection lost");
 	}
 
