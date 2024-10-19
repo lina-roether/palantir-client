@@ -99,6 +99,8 @@ export class Connection extends TypedEventTarget<ConnectionEventMap> {
 	}
 
 	private onAuthenticated() {
+		logger.info(`Successfully logged in as ${this.username} on ${this.channel.getUrl()}`);
+		this.state = ConnectionState.AUTHENTICATED;
 		this.dispatchEvent(new TypedEvent("open"));
 		this.startKeepalive();
 	}
@@ -163,8 +165,8 @@ export class Connection extends TypedEventTarget<ConnectionEventMap> {
 
 	private expectAuthAck(message: Message) {
 		if (message.m == "connection::login_ack/v1") {
-			logger.info(`Successfully logged in as ${this.username} on ${this.channel.getUrl()}`);
-			this.state = ConnectionState.AUTHENTICATED;
+			this.onAuthenticated();
+			return;
 		} else {
 			logger.warning(`Received unexpected message ${message.m}; expected connection::login_ack/v1`);
 		}
