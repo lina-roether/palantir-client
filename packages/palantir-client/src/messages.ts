@@ -39,7 +39,7 @@ const RoomCreateMsgBodySchema = z.object({
 export type RoomCreateMsgBody = z.infer<typeof RoomCreateMsgBodySchema>;
 
 const RoomJoinMsgBodySchema = z.object({
-	id: z.string().uuid(),
+	id: z.instanceof(Uint8Array),
 	password: z.string(),
 });
 export type RoomJoinMsgBody = z.infer<typeof RoomJoinMsgBodySchema>;
@@ -48,14 +48,14 @@ const RoomUserRoleSchema = z.enum(["host", "guest"]);
 export type RoomUserRole = z.infer<typeof RoomUserRoleSchema>;
 
 const RoomUserSchema = z.object({
-	id: z.string().uuid(),
+	id: z.instanceof(Uint8Array),
 	name: z.string(),
 	role: RoomUserRoleSchema,
 });
 export type RoomUser = z.infer<typeof RoomUserSchema>;
 
 const RoomStateMsgBodySchema = z.object({
-	id: z.string().uuid(),
+	id: z.instanceof(Uint8Array),
 	name: z.string(),
 	password: z.string(),
 	users: z.array(RoomUserSchema),
@@ -149,6 +149,7 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 	}
 
 	public send(body: MessageBody): void {
+		logger.debug(`Sending message: ${JSON.stringify(body)}`);
 		try {
 			this.ws.send(this.encodeMessage(body));
 		} catch (e) {

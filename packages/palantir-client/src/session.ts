@@ -2,6 +2,7 @@ import { ClosedEvent, Connection, ConnectionOptions, ErrorEvent } from "./connec
 import { baseLogger } from "./logger";
 import { Message, RoomStateMsgBody } from "./messages";
 import { TypedEvent, TypedEventTarget } from "./utils";
+import * as uuid from "uuid";
 
 const logger = baseLogger.sub("session");
 
@@ -114,6 +115,7 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 	}
 
 	public createRoom(init: RoomInit) {
+		logger.info(`Creating new room with name ${init.name}...`);
 		if (this.state != State.INITIAL) {
 			throw new Error("Already in a room");
 		}
@@ -132,10 +134,11 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 	}
 
 	public joinRoom(id: string, password: string) {
+		logger.info(`Joining room with id ${id}...`);
 		if (this.state != State.INITIAL) {
 			throw new Error("Already in a room");
 		}
-		this.connection.send({ m: "room::join/v1", id, password });
+		this.connection.send({ m: "room::join/v1", id: uuid.parse(id), password });
 		this.state = State.JOINING;
 		setTimeout(() => {
 			if (this.state == State.JOINING) {
@@ -147,6 +150,7 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 
 	public leaveRoom() {
 		if (!this.isInRoom()) return;
+		logger.info(`Leaving current room...`);
 		this.roomData = null;
 		this.connection.send({ m: "room::leave/v1" });
 		this.state = State.LEAVING;
@@ -204,11 +208,11 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 
 	private updateRoomData(state: RoomStateMsgBody) {
 		this.roomData = {
-			id: state.id,
+			id: uuid.stringify(state.id),
 			name: state.name,
 			password: state.password,
 			users: state.users.map((user) => ({
-				id: user.id,
+				id: uuid.stringify(user.id),
 				name: user.name,
 				role: user.role
 			}))
