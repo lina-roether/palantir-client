@@ -22,7 +22,7 @@ export const LeaveRoomMessageSchema = z.object({
 
 export const SessionStateMessageSchema = z.object({
 	type: z.literal("session_state"),
-	inRoom: z.boolean(),
+	roomConnectionStatus: z.enum(["not_in_room", "joining", "in_room", "leaving"]),
 	userRole: z.enum(["host", "guest"]).optional(),
 	roomData: z.object({
 		id: z.string(),

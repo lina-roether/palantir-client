@@ -1,4 +1,4 @@
-import { Session, type RoomInit, type SessionOptions, type SessionState } from "palantir-client";
+import { Session, type RoomInit, type SessionOptions, type SessionState, RoomConnectionStatus } from "palantir-client";
 import { getOptions, invalidateCachedOptions } from "../options";
 import { backgroundLogger } from "./logger";
 import { MessageSchema, type Message } from "../messages";
@@ -89,7 +89,7 @@ async function tryEnsureSession() {
 }
 
 function getSessionState(): SessionState {
-	if (!session) return { inRoom: false };
+	if (!session) return { roomConnectionStatus: RoomConnectionStatus.NOT_IN_ROOM };
 	return session.getState();
 }
 

@@ -1,5 +1,5 @@
 import { Message, MessageBody } from "./messages";
-import { RoomInit, Session, SessionOptions, SessionState, UpdateEvent } from "./session";
+import { RoomConnectionStatus, RoomInit, Session, SessionOptions, SessionState, UpdateEvent } from "./session";
 
 export {
 	Message,
@@ -9,4 +9,5 @@ export {
 	SessionState,
 	RoomInit,
 	UpdateEvent,
+	RoomConnectionStatus
 }

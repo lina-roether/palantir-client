@@ -21,8 +21,15 @@ export interface RoomData {
 	users: User[]
 }
 
+export enum RoomConnectionStatus {
+	NOT_IN_ROOM = "not_in_room",
+	JOINING = "joining",
+	IN_ROOM = "in_room",
+	LEAVING = "leaving"
+}
+
 export interface SessionState {
-	inRoom: boolean;
+	roomConnectionStatus: RoomConnectionStatus,
 	userRole?: UserRole;
 	roomData?: RoomData;
 }
@@ -85,8 +92,23 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		return this.connection.open;
 	}
 
+	public roomConnectionStatus(): RoomConnectionStatus {
+		switch (this.state) {
+			case State.INITIAL:
+				return RoomConnectionStatus.NOT_IN_ROOM;
+			case State.JOINING:
+			case State.CREATING:
+				return RoomConnectionStatus.JOINING;
+			case State.CREATED:
+			case State.JOINED:
+				return RoomConnectionStatus.IN_ROOM;
+			case State.LEAVING:
+				return RoomConnectionStatus.LEAVING;
+		}
+	}
+
 	public isInRoom() {
-		return this.state == State.JOINED || this.state == State.CREATED;
+		return this.roomConnectionStatus() == RoomConnectionStatus.IN_ROOM;
 	}
 
 	public getUserRole(): UserRole | undefined {
@@ -108,7 +130,7 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 
 	public getState(): SessionState {
 		return {
-			inRoom: this.isInRoom(),
+			roomConnectionStatus: this.roomConnectionStatus(),
 			userRole: this.getUserRole(),
 			roomData: this.roomData ?? undefined
 		}
