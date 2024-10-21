@@ -14,9 +14,19 @@ block content
     div(class="popup__buttons")
       +palantir-button("primary")(class="popup__button js_popup__open-options") Open options
   template(id="popup__template-start-session")
-    div(class="popup__buttons")
-      +palantir-button("secondary")(class="popup__button js_popup__open-options") Open options
-      +palantir-button("primary")(class="popup__button js_popup__start-session") Start session
+    p(class="copy-100")
+      | You are logging into
+      |
+      b(class="js_popup__server-url")
+      |
+      | with username
+      |
+      b(class="js_popup__username")
+    +palantir-button("secondary")(class="popup__button js_popup__open-options") Open options
+
+    +palantir-divider()
+
+    +palantir-button("primary")(class="popup__button js_popup__start-session") Start session
 
 block append scripts
   script(src=include("pages/popup/+popup.ts"))

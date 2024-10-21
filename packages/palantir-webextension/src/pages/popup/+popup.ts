@@ -22,14 +22,21 @@ function initOpenOptionsButton(button: HTMLButtonElement) {
 
 const port = browser.runtime.connect({ name: "popup" });
 
-function initStartSession(elem: HTMLElement) {
+async function initStartSession(elem: HTMLElement) {
 	const openOptionsButton = assertTypedElement(".js_popup__open-options", HTMLButtonElement, elem);
 	const startSessionButton = assertTypedElement(".js_popup__start-session", HTMLButtonElement, elem);
+	const serverUrlElem = assertTypedElement(".js_popup__server-url", HTMLElement);
+	const usernameElem = assertTypedElement(".js_popup__username", HTMLElement);
+
 	initOpenOptionsButton(openOptionsButton);
 	startSessionButton.addEventListener("click", () => {
 		logger.debug("Attempting to start session...");
 		port.postMessage({ type: "create_room", name: "Test Room", password: "123" } as Message);
 	});
+
+	const options = await getOptions();
+	serverUrlElem.innerText = options.serverUrl ?? "<no url set>";
+	usernameElem.innerText = options.username ?? "<no username set>";
 }
 
 function initIncompleteOptions(elem: HTMLElement) {
