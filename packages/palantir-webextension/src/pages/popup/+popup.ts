@@ -3,17 +3,50 @@ import { baseLogger } from "../../logger";
 import { initComponent } from "../../utils/component";
 import { initStateContainer } from "../../utils/state";
 import type { Message } from "../../messages";
+import { assertTypedElement } from "../../utils/query";
 
 const logger = baseLogger.sub("page", "popup");
 
 const enum State {
-	INCOMPLETE_OPTIONS,
-	START_SESSION
+	INCOMPLETE_OPTIONS = "incomplete_options",
+	START_SESSION = "start_session"
 }
 
+function initOpenOptionsButton(button: HTMLButtonElement) {
+	button.addEventListener("click", () => {
+		logger.info("Opening options page...");
+		void browser.runtime.openOptionsPage();
+		window.close();
+	});
+}
+
+const port = browser.runtime.connect({ name: "popup" });
+
+function initStartSession(elem: HTMLElement) {
+	const openOptionsButton = assertTypedElement(".js_popup__open-options", HTMLButtonElement, elem);
+	const startSessionButton = assertTypedElement(".js_popup__start-session", HTMLButtonElement, elem);
+	initOpenOptionsButton(openOptionsButton);
+	startSessionButton.addEventListener("click", () => {
+		logger.debug("Attempting to start session...");
+		port.postMessage({ type: "create_room", name: "Test Room", password: "123" } as Message);
+	});
+}
+
+function initIncompleteOptions(elem: HTMLElement) {
+	const openOptionsButton = assertTypedElement(".js_popup__open-options", HTMLButtonElement, elem);
+	initOpenOptionsButton(openOptionsButton);
+}
+
+
 const stateController = initStateContainer("#popup__content", {
-	[State.INCOMPLETE_OPTIONS]: "#popup__template-options-incomplete",
-	[State.START_SESSION]: "#popup__template-start-session"
+	[State.INCOMPLETE_OPTIONS]: {
+		template: "#popup__template-options-incomplete",
+		handler: initIncompleteOptions,
+	},
+	[State.START_SESSION]: {
+		template: "#popup__template-start-session",
+		handler: initStartSession,
+	}
 });
 
 async function setInitialState() {
@@ -27,19 +60,3 @@ async function setInitialState() {
 
 void setInitialState();
 
-const port = browser.runtime.connect({ name: "popup" });
-
-initComponent(".js_popup__open-options", HTMLButtonElement, (button) => {
-	button.addEventListener("click", () => {
-		logger.info("Opening options page...");
-		void browser.runtime.openOptionsPage();
-		window.close();
-	});
-});
-
-initComponent(".js_popup__start-session", HTMLButtonElement, (button) => {
-	button.addEventListener("click", () => {
-		logger.debug("Attempting to start session...");
-		port.postMessage({ type: "create_room", name: "Test Room", password: "123" } as Message);
-	});
-});
