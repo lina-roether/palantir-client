@@ -119,7 +119,7 @@ async function getBundlesRecursive(bundles, distFiles, baseDir) {
 
 		if (bundle.distName in distFiles) {
 			const conflictBundle = distFiles[bundle.distName];
-			logger.error(`Failed to resolve bundle ${bundle}: file ${bundle} is already produced by bundle ${conflictBundle.srcName.distName.srcName}`);
+			logger.error(`Failed to resolve bundle ${bundle}: file ${bundle} is already produced by bundle ${conflictBundle.srcName}`);
 			continue;
 		}
 		distFiles[bundle.distName] = bundle;
