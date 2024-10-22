@@ -25,8 +25,12 @@ block content
     +palantir-button("secondary")(class="popup__button js_popup__open-options") Open options
 
     +palantir-divider()
-
-    +palantir-button("primary")(class="popup__button js_popup__start-session") Start session
+    
+    form(id="popup__start-session-form")
+      +palantir-input-row("popup__room-name", "Room name")
+        +palantir-text-field()(id="popup__room-name")
+      +palantir-form-actions()
+        +palantir-button("primary")(class="popup__button js_popup__create-room") Create room
 
 block append scripts
   script(src=include("pages/popup/+popup.ts"))
