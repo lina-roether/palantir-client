@@ -150,7 +150,10 @@ export function initForm<F extends string>(logger: Logger, options: FormOptions<
 
 	async function updateFieldState(input: HTMLInputElement) {
 		const valid = validateField(input);
-		const changed = await checkFieldChanged(input);
+		let changed = false;
+		if (options.mode === FormMode.EDIT) {
+			changed = await checkFieldChanged(input);
+		}
 
 		validationState[input.name] = {
 			changed,
