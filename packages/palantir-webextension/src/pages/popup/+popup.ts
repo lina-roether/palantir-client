@@ -43,9 +43,31 @@ async function initStartSession(elem: HTMLElement) {
 				value: "",
 				validate: (value) => {
 					if (!value) return "Please enter a room name";
+					if (typeof value !== "string") return "Only text values are allowed";
+					return "";
+				}
+			},
+			roomPassword: {
+				value: "",
+				validate: (value) => {
+					if (!value) return "Pleaser enter a room password";
+					if (typeof value !== "string") return "Only text values are allowed";
+					if (value.length < 5) return "Password must be at least 5 characters";
 					return "";
 				}
 			}
+		},
+		onSubmit(data) {
+			const roomName = data.get("roomName");
+			const roomPassword = data.get("roomPassword");
+
+			if (typeof roomName !== "string" || typeof roomPassword !== "string") return;
+
+			port.postMessage({
+				type: "create_room",
+				name: roomName,
+				password: roomPassword
+			} satisfies Message)
 		}
 	})
 
@@ -58,7 +80,6 @@ function initIncompleteOptions(elem: HTMLElement) {
 	const openOptionsButton = assertElement(logger, ".js_popup__open-options", HTMLButtonElement, elem);
 	initOpenOptionsButton(openOptionsButton);
 }
-
 
 const stateController = initStateContainer(logger, "#popup__content", {
 	[State.INCOMPLETE_OPTIONS]: {

@@ -29,6 +29,8 @@ block content
     form(id="popup__start-session-form")
       +palantir-input-row("popup__room-name", "Room name")
         +palantir-text-field()(id="popup__room-name" name="roomName")
+      +palantir-input-row("popup__room-password", "Room password")
+        +palantir-text-field()(id="popup__room-password" name="roomPassword")
       +palantir-form-actions()
         +palantir-button("primary")(class="popup__button js_popup__create-room" type="submit") Create room
 
