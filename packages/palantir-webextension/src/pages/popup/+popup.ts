@@ -3,6 +3,7 @@ import { baseLogger } from "../../logger";
 import { initStateContainer } from "../../utils/state";
 import type { Message } from "../../messages";
 import { assertTypedElement } from "../../utils/query";
+import { runPromise } from "../../utils/error";
 
 const logger = baseLogger.sub("page", "popup");
 
@@ -14,7 +15,7 @@ const enum State {
 function initOpenOptionsButton(button: HTMLButtonElement) {
 	button.addEventListener("click", () => {
 		logger.info("Opening options page...");
-		void browser.runtime.openOptionsPage();
+		runPromise(logger, browser.runtime.openOptionsPage(), "Failed to open options page");
 		window.close();
 	});
 }
@@ -51,7 +52,7 @@ const stateController = initStateContainer(logger, "#popup__content", {
 	},
 	[State.START_SESSION]: {
 		template: "#popup__template-start-session",
-		handler: () => void initStartSession,
+		handler: (elem) => { runPromise(logger, initStartSession(elem), "Failed to initialize page"); },
 	}
 });
 
@@ -64,5 +65,5 @@ async function setInitialState() {
 	}
 }
 
-void setInitialState();
+runPromise(logger, setInitialState(), "Failed to set initial state");
 

@@ -3,7 +3,7 @@ import { getOptions, invalidateCachedOptions } from "../options";
 import { backgroundLogger } from "./logger";
 import { MessageSchema, type Message } from "../messages";
 import "../log_writer";
-import { errorMessage } from "../utils/error";
+import { errorMessage, runPromise } from "../utils/error";
 
 const logger = backgroundLogger;
 
@@ -167,13 +167,21 @@ browser.runtime.onConnect.addListener((port) => {
 		logger.debug(`Received message from port '${port.name}': ${JSON.stringify(message)}`)
 		switch (message.type) {
 			case "join_room":
-				void joinRoom(message.id, message.password);
+				runPromise(
+					logger,
+					joinRoom(message.id, message.password),
+					"Failed to join room"
+				);
 				break;
 			case "create_room":
-				void createRoom({
-					name: message.name,
-					password: message.password
-				});
+				runPromise(
+					logger,
+					createRoom({
+						name: message.name,
+						password: message.password
+					}),
+					"Failed to create room"
+				);
 				break;
 			case "leave_room":
 				leaveRoom();

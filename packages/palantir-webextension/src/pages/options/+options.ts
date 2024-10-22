@@ -2,6 +2,7 @@ import { getOptions, setOptions } from "../../options";
 import { assertTypedElement } from "../../utils/query";
 import { FormMode, initForm } from "../../utils/form";
 import { baseLogger } from "../../logger";
+import { runPromise } from "../../utils/error";
 
 const logger = baseLogger.sub("page", "options");
 
@@ -75,11 +76,16 @@ function onSubmit(data: FormData) {
 	const apiKey = (data.get("apiKey") ?? "") as string;
 
 
-	setOptions({ username, serverUrl, apiKey: useApiKey ? apiKey : undefined })
-		.catch((err: unknown) => {
-			logger.error(`Failed to set options`, err);
-		});
-	void browser.runtime.sendMessage({ type: "options_changed" });
+	runPromise(
+		logger,
+		setOptions({ username, serverUrl, apiKey: useApiKey ? apiKey : undefined }),
+		"Failed to set options"
+	);
+	runPromise(
+		logger,
+		browser.runtime.sendMessage({ type: "options_changed" }),
+		"Failed to broadcast options change"
+	);
 }
 
 useApiKeyInput.addEventListener("change", () => {

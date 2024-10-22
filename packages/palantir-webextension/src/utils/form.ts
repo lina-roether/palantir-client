@@ -1,5 +1,6 @@
 import type { Logger } from "@just-log/core";
 import { assertTypedElement } from "./query";
+import { runPromise } from "./error";
 
 export const enum FormMode {
 	SUBMIT,
@@ -84,7 +85,9 @@ export function initForm<F extends string>(logger: Logger, options: FormOptions<
 	const validationState: Record<string, FieldValidationState> = {};
 
 	for (const resetButton of resetElements ?? []) {
-		if (resetButton instanceof HTMLButtonElement) resetButton.addEventListener("click", () => void reset());
+		if (resetButton instanceof HTMLButtonElement) {
+			resetButton.addEventListener("click", () => { runPromise(logger, reset(), "Failed to reset form"); });
+		}
 	}
 
 	function computeCanSubmit() {
@@ -179,13 +182,13 @@ export function initForm<F extends string>(logger: Logger, options: FormOptions<
 			}
 
 			input.addEventListener(updateEvent, () => {
-				void updateFieldState(input);
+				runPromise(logger, updateFieldState(input), "Failed to update field state");
 			});
 
 			// To allow detecting when inputs become enabled/disabled, because validation
 			// doesn't work properly when fields are disabled
 			const attrObserver = new MutationObserver(() => {
-				void updateFieldState(input);
+				runPromise(logger, updateFieldState(input), "Failed to update field state");
 			});
 			attrObserver.observe(input, { attributes: true, attributeFilter: ["disabled"] });
 		}
@@ -196,13 +199,14 @@ export function initForm<F extends string>(logger: Logger, options: FormOptions<
 		evt.preventDefault();
 		const data = new FormData(form);
 		options.onSubmit?.(data);
-		void updateAllFields();
+		runPromise(logger, updateAllFields(), "Failed to update form fields");
 	});
 
 	// initial setup
-	void reset()
+	const promise = reset()
 		.then(() => updateAllFields())
 		.then(() => { setFormButtonsState() });
+	runPromise(logger, promise, "Failed to run initial form setup");
 	setFieldChangeListeners();
 
 	return { set, reset };

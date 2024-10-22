@@ -120,7 +120,8 @@ export class MessageChannel extends TypedEventTarget<MessageChannelEventMap> {
 		super();
 		this.ws = new WebSocket(url);
 		this.ws.addEventListener("message", (evt) => {
-			void this.onMessage(evt.data);
+			this.onMessage(evt.data)
+				.catch((err: unknown) => { logger.error("Failed to handle message", err); });
 		});
 		this.ws.addEventListener("error", () => {
 			logger.error(`Websocket disconnected from ${this.getUrl()} due to an error.`);
