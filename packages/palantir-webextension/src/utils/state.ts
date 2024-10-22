@@ -1,7 +1,5 @@
-import { baseLogger } from "../logger";
+import type { Logger } from "@just-log/core";
 import { assertTypedElement } from "./query";
-
-const logger = baseLogger.sub("utils", "state");
 
 export type StateHandler = (container: HTMLElement) => void;
 
@@ -13,12 +11,14 @@ export interface StateDefinition {
 export type StateMap<T extends string | number> = Record<T, string | StateDefinition>;
 
 export class StateController<T extends string | number> {
+	private logger: Logger;
 	private container: HTMLElement;
 	private state: T | null = null;
 	private templates: Record<T, HTMLTemplateElement>;
 	private handlers: Record<T, StateHandler | undefined>
 
-	constructor(container: HTMLElement, templates: Record<T, HTMLTemplateElement>, handlers: Record<T, StateHandler | undefined>) {
+	constructor(logger: Logger, container: HTMLElement, templates: Record<T, HTMLTemplateElement>, handlers: Record<T, StateHandler | undefined>) {
+		this.logger = logger;
 		this.container = container;
 		this.templates = templates;
 		this.handlers = handlers;
@@ -29,7 +29,7 @@ export class StateController<T extends string | number> {
 	}
 
 	public setState(state: T) {
-		logger.debug(`Setting page state to ${state.toString()}`)
+		this.logger.debug(`Setting page state to ${state.toString()}`)
 		this.state = state;
 		this.container.innerHTML = "";
 		this.container.appendChild(this.templates[state].content.cloneNode(true));
@@ -37,7 +37,7 @@ export class StateController<T extends string | number> {
 	}
 }
 
-export function initStateContainer<T extends string>(container: string, definitions: StateMap<T>) {
+export function initStateContainer<T extends string>(logger: Logger, container: string, definitions: StateMap<T>) {
 	const containerElement = assertTypedElement(container, HTMLElement);
 	const templateElements: Partial<Record<T, HTMLTemplateElement>> = {};
 	const stateHandlers: Partial<Record<T, StateHandler | undefined>> = {};
@@ -51,6 +51,7 @@ export function initStateContainer<T extends string>(container: string, definiti
 		}
 	}
 	return new StateController(
+		logger,
 		containerElement,
 		templateElements as Record<T, HTMLTemplateElement>,
 		stateHandlers as Record<T, StateHandler | undefined>

@@ -1,6 +1,5 @@
 import { getOptions } from "../../options";
 import { baseLogger } from "../../logger";
-import { initComponent } from "../../utils/component";
 import { initStateContainer } from "../../utils/state";
 import type { Message } from "../../messages";
 import { assertTypedElement } from "../../utils/query";
@@ -45,14 +44,14 @@ function initIncompleteOptions(elem: HTMLElement) {
 }
 
 
-const stateController = initStateContainer("#popup__content", {
+const stateController = initStateContainer(logger, "#popup__content", {
 	[State.INCOMPLETE_OPTIONS]: {
 		template: "#popup__template-options-incomplete",
 		handler: initIncompleteOptions,
 	},
 	[State.START_SESSION]: {
 		template: "#popup__template-start-session",
-		handler: initStartSession,
+		handler: () => void initStartSession,
 	}
 });
 

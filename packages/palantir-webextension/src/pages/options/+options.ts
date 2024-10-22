@@ -8,7 +8,7 @@ const logger = baseLogger.sub("page", "options");
 const useApiKeyInput = assertTypedElement("#options__use-api-key", HTMLInputElement);
 const apiKeyInput = assertTypedElement("#options__api-key", HTMLInputElement);
 
-initForm({
+initForm(logger, {
 	query: "#options__form",
 	mode: FormMode.EDIT,
 	resetButton: "#options__reset",

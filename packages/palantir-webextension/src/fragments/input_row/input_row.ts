@@ -1,5 +1,8 @@
+import { baseLogger } from "../../logger";
 import { initComponent } from "../../utils/component";
 import { assertTypedElement } from "../../utils/query";
+
+const logger = baseLogger.sub("components", "row");
 
 function init(elem: HTMLElement) {
 	const input = elem.querySelector("input");
@@ -28,4 +31,4 @@ function init(elem: HTMLElement) {
 	}
 }
 
-initComponent(".js_palantir-input-row", HTMLElement, init);
+initComponent(logger, ".js_palantir-input-row", HTMLElement, init);

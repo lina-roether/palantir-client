@@ -1,8 +1,5 @@
-import { baseLogger } from "../logger";
+import type { Logger } from "@just-log/core";
 import { assertTypedElement } from "./query";
-
-const logger = baseLogger.sub("utils", "form");
-
 
 export const enum FormMode {
 	SUBMIT,
@@ -36,7 +33,7 @@ interface FieldValidationState {
 	valid: boolean;
 }
 
-export function initForm<F extends string>(options: FormOptions<F>, rootElem: Element = document.body): FormManager<F> {
+export function initForm<F extends string>(logger: Logger, options: FormOptions<F>, rootElem: Element = document.body): FormManager<F> {
 	const form = assertTypedElement(options.query, HTMLFormElement, rootElem);
 	const initialValueGetters: Partial<Record<F, () => Promise<FormFieldValue>>> = {};
 	for (const fieldName in options.fields) {
