@@ -1,5 +1,5 @@
 import type { Logger } from "@just-log/core";
-import { assertTypedElement } from "./query";
+import { assertElement } from "./query";
 
 export type StateHandler = (container: HTMLElement) => void;
 
@@ -38,15 +38,15 @@ export class StateController<T extends string | number> {
 }
 
 export function initStateContainer<T extends string>(logger: Logger, container: string, definitions: StateMap<T>) {
-	const containerElement = assertTypedElement(container, HTMLElement);
+	const containerElement = assertElement(logger, container, HTMLElement);
 	const templateElements: Partial<Record<T, HTMLTemplateElement>> = {};
 	const stateHandlers: Partial<Record<T, StateHandler | undefined>> = {};
 	for (const state in definitions) {
 		const def = definitions[state];
 		if (typeof def == "string") {
-			templateElements[state] = assertTypedElement(def, HTMLTemplateElement);
+			templateElements[state] = assertElement(logger, def, HTMLTemplateElement);
 		} else {
-			templateElements[state] = assertTypedElement(def.template, HTMLTemplateElement);
+			templateElements[state] = assertElement(logger, def.template, HTMLTemplateElement);
 			stateHandlers[state] = def.handler;
 		}
 	}

@@ -2,7 +2,7 @@ import { getOptions } from "../../options";
 import { baseLogger } from "../../logger";
 import { initStateContainer } from "../../utils/state";
 import type { Message } from "../../messages";
-import { assertTypedElement } from "../../utils/query";
+import { assertElement } from "../../utils/query";
 import { runPromise } from "../../utils/error";
 
 const logger = baseLogger.sub("page", "popup");
@@ -23,10 +23,10 @@ function initOpenOptionsButton(button: HTMLButtonElement) {
 const port = browser.runtime.connect({ name: "popup" });
 
 async function initStartSession(elem: HTMLElement) {
-	const openOptionsButton = assertTypedElement(".js_popup__open-options", HTMLButtonElement, elem);
-	const startSessionButton = assertTypedElement(".js_popup__start-session", HTMLButtonElement, elem);
-	const serverUrlElem = assertTypedElement(".js_popup__server-url", HTMLElement);
-	const usernameElem = assertTypedElement(".js_popup__username", HTMLElement);
+	const openOptionsButton = assertElement(logger, ".js_popup__open-options", HTMLButtonElement, elem);
+	const startSessionButton = assertElement(logger, ".js_popup__start-session", HTMLButtonElement, elem);
+	const serverUrlElem = assertElement(logger, ".js_popup__server-url", HTMLElement);
+	const usernameElem = assertElement(logger, ".js_popup__username", HTMLElement);
 
 	initOpenOptionsButton(openOptionsButton);
 	startSessionButton.addEventListener("click", () => {
@@ -40,7 +40,7 @@ async function initStartSession(elem: HTMLElement) {
 }
 
 function initIncompleteOptions(elem: HTMLElement) {
-	const openOptionsButton = assertTypedElement(".js_popup__open-options", HTMLButtonElement, elem);
+	const openOptionsButton = assertElement(logger, ".js_popup__open-options", HTMLButtonElement, elem);
 	initOpenOptionsButton(openOptionsButton);
 }
 

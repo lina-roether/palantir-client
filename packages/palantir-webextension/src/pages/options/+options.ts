@@ -1,13 +1,13 @@
 import { getOptions, setOptions } from "../../options";
-import { assertTypedElement } from "../../utils/query";
+import { assertElement } from "../../utils/query";
 import { FormMode, initForm } from "../../utils/form";
 import { baseLogger } from "../../logger";
 import { runPromise } from "../../utils/error";
 
 const logger = baseLogger.sub("page", "options");
 
-const useApiKeyInput = assertTypedElement("#options__use-api-key", HTMLInputElement);
-const apiKeyInput = assertTypedElement("#options__api-key", HTMLInputElement);
+const useApiKeyInput = assertElement(logger, "#options__use-api-key", HTMLInputElement);
+const apiKeyInput = assertElement(logger, "#options__api-key", HTMLInputElement);
 
 initForm(logger, {
 	query: "#options__form",
