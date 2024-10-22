@@ -4,6 +4,7 @@ import { initStateContainer } from "../../utils/state";
 import type { Message } from "../../messages";
 import { assertElement } from "../../utils/query";
 import { runPromise } from "../../utils/error";
+import { FormMode, initForm } from "../../utils/form";
 
 const logger = baseLogger.sub("page", "popup");
 
@@ -33,6 +34,20 @@ async function initStartSession(elem: HTMLElement) {
 		logger.debug("Attempting to start session...");
 		port.postMessage({ type: "create_room", name: "Test Room", password: "123" } as Message);
 	});
+
+	initForm(logger, {
+		query: "#popup__start-session-form",
+		mode: FormMode.SUBMIT,
+		fields: {
+			roomName: {
+				value: "",
+				validate: (value) => {
+					if (!value) return "Please enter a room name";
+					return "";
+				}
+			}
+		}
+	})
 
 	const options = await getOptions();
 	serverUrlElem.innerText = options.serverUrl ?? "<no url set>";
