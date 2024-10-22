@@ -186,6 +186,9 @@ browser.runtime.onConnect.addListener((port) => {
 			case "leave_room":
 				leaveRoom();
 				break;
+			case "get_session_state":
+				postSessionState(port);
+				break;
 			default:
 				logger.warning(`Received unexpected message from port '${port.name}': ${message.type}`);
 		}

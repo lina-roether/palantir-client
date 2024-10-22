@@ -1,3 +1,4 @@
+import { RoomConnectionStatus } from "palantir-client";
 import z from "zod";
 
 export const OptionsChangedMessageSchema = z.object({
@@ -20,9 +21,13 @@ export const LeaveRoomMessageSchema = z.object({
 	type: z.literal("leave_room")
 });
 
+export const GetSessionStateMessageSchema = z.object({
+	type: z.literal("get_session_state")
+});
+
 export const SessionStateMessageSchema = z.object({
 	type: z.literal("session_state"),
-	roomConnectionStatus: z.enum(["not_in_room", "joining", "in_room", "leaving"]),
+	roomConnectionStatus: z.nativeEnum(RoomConnectionStatus),
 	userRole: z.enum(["host", "guest"]).optional(),
 	roomData: z.object({
 		id: z.string(),
@@ -33,7 +38,7 @@ export const SessionStateMessageSchema = z.object({
 			name: z.string(),
 			role: z.enum(["host", "guest"])
 		}))
-	})
+	}).optional()
 });
 
 export const SessionErrorMessageSchema = z.object({
@@ -46,6 +51,7 @@ export const MessageSchema = z.discriminatedUnion("type", [
 	CreateRoomMessageSchema,
 	JoinRoomMessageSchema,
 	LeaveRoomMessageSchema,
+	GetSessionStateMessageSchema,
 	SessionStateMessageSchema,
 	SessionErrorMessageSchema
 ]);

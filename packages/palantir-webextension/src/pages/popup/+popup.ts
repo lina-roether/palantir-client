@@ -1,16 +1,19 @@
 import { getOptions } from "../../options";
 import { baseLogger } from "../../logger";
 import { initStateContainer } from "../../utils/state";
-import type { Message } from "../../messages";
+import { MessageSchema, type Message } from "../../messages";
 import { assertElement } from "../../utils/query";
 import { runPromise } from "../../utils/error";
 import { FormMode, initForm } from "../../utils/form";
+import { RoomConnectionStatus, type SessionState } from "palantir-client";
 
 const logger = baseLogger.sub("page", "popup");
 
 const enum State {
+	LOADING = "loading",
 	INCOMPLETE_OPTIONS = "incomplete_options",
-	START_SESSION = "start_session"
+	CREATE_ROOM = "start_session",
+	IN_ROOM = "in_room",
 }
 
 function initOpenOptionsButton(button: HTMLButtonElement) {
@@ -23,17 +26,65 @@ function initOpenOptionsButton(button: HTMLButtonElement) {
 
 const port = browser.runtime.connect({ name: "popup" });
 
+port.onMessage.addListener((obj) => {
+	const message = MessageSchema.parse(obj);
+	switch (message.type) {
+		case "session_state":
+			onSessionStateUpdate(message);
+	}
+});
+port.postMessage({ type: "get_session_state" } satisfies Message);
+
+const stateController = initStateContainer(logger, "#popup__content", {
+	[State.LOADING]: {
+		template: "#popup__template-loading",
+	},
+	[State.INCOMPLETE_OPTIONS]: {
+		template: "#popup__template-options-incomplete",
+		handler: initIncompleteOptions,
+	},
+	[State.CREATE_ROOM]: {
+		template: "#popup__template-create-room",
+		handler: (elem) => { runPromise(logger, initStartSession(elem), "Failed to initialize page"); },
+	},
+	[State.IN_ROOM]: {
+		template: "#popup__template-in-room",
+		handler: initInRoom
+	}
+});
+
+let sessionState: SessionState | null = null;
+
+function onSessionStateUpdate(state: SessionState) {
+	logger.debug(`Received session state update: ${JSON.stringify(state)}`);
+	sessionState = state;
+	switch (state.roomConnectionStatus) {
+		case RoomConnectionStatus.NOT_IN_ROOM:
+			stateController.setState(State.CREATE_ROOM);
+			break;
+		case RoomConnectionStatus.IN_ROOM:
+			stateController.setState(State.IN_ROOM);
+			break;
+		case RoomConnectionStatus.JOINING:
+		case RoomConnectionStatus.LEAVING:
+			stateController.setState(State.LOADING);
+	}
+}
+
+function initInRoom(elem: HTMLElement) {
+	const leaveRoomButton = assertElement(logger, ".js_popup__leave-room", HTMLButtonElement, elem);
+	leaveRoomButton.addEventListener("click", () => {
+		port.postMessage({ type: "leave_room" } satisfies Message);
+		stateController.setState(State.LOADING);
+	});
+}
+
 async function initStartSession(elem: HTMLElement) {
 	const openOptionsButton = assertElement(logger, ".js_popup__open-options", HTMLButtonElement, elem);
-	const startSessionButton = assertElement(logger, ".js_popup__start-session", HTMLButtonElement, elem);
-	const serverUrlElem = assertElement(logger, ".js_popup__server-url", HTMLElement);
-	const usernameElem = assertElement(logger, ".js_popup__username", HTMLElement);
+	const serverUrlElem = assertElement(logger, ".js_popup__server-url", HTMLElement, elem);
+	const usernameElem = assertElement(logger, ".js_popup__username", HTMLElement, elem);
 
 	initOpenOptionsButton(openOptionsButton);
-	startSessionButton.addEventListener("click", () => {
-		logger.debug("Attempting to start session...");
-		port.postMessage({ type: "create_room", name: "Test Room", password: "123" } as Message);
-	});
 
 	initForm(logger, {
 		query: "#popup__start-session-form",
@@ -67,7 +118,8 @@ async function initStartSession(elem: HTMLElement) {
 				type: "create_room",
 				name: roomName,
 				password: roomPassword
-			} satisfies Message)
+			} satisfies Message);
+			stateController.setState(State.LOADING);
 		}
 	})
 
@@ -81,23 +133,12 @@ function initIncompleteOptions(elem: HTMLElement) {
 	initOpenOptionsButton(openOptionsButton);
 }
 
-const stateController = initStateContainer(logger, "#popup__content", {
-	[State.INCOMPLETE_OPTIONS]: {
-		template: "#popup__template-options-incomplete",
-		handler: initIncompleteOptions,
-	},
-	[State.START_SESSION]: {
-		template: "#popup__template-start-session",
-		handler: (elem) => { runPromise(logger, initStartSession(elem), "Failed to initialize page"); },
-	}
-});
-
 async function setInitialState() {
 	const options = await getOptions();
 	if (!options.username || !options.username) {
 		stateController.setState(State.INCOMPLETE_OPTIONS);
 	} else {
-		stateController.setState(State.START_SESSION)
+		stateController.setState(State.CREATE_ROOM)
 	}
 }
 

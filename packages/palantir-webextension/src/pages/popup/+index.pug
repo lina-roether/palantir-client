@@ -7,13 +7,14 @@ block append head
 block content
   +palantir-card("Palantir")
     div(id="popup__content")
+  template(id="popup__template-loading")
   template(id="popup__template-options-incomplete")
     p(class="copy-100")
       | Your options are incomplete. Please open the options page
       | and add all missing fields.
     div(class="popup__buttons")
       +palantir-button("primary")(class="popup__button js_popup__open-options") Open options
-  template(id="popup__template-start-session")
+  template(id="popup__template-create-room")
     p(class="copy-100")
       | You are logging into
       |
@@ -33,6 +34,9 @@ block content
         +palantir-text-field()(id="popup__room-password" name="roomPassword")
       +palantir-form-actions()
         +palantir-button("primary")(class="popup__button js_popup__create-room" type="submit") Create room
+  template(id="popup__template-in-room")
+    div(class="popup__buttons")
+      +palantir-button("secondary")(class="popup__button js_popup__leave-room") Leave room
 
 block append scripts
   script(src=include("pages/popup/+popup.ts"))
