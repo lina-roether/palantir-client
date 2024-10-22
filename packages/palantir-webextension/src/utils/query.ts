@@ -14,7 +14,7 @@ export function assertElement<E extends Element>(
 	const elem = rootElem.querySelector(query);
 	if (!elem) {
 		logger.error(`Missing required element \`${query}\``);
-		return document.createElement(elementConstructor.prototype.tagName) as unknown as E;
+		return document.createElement("div") as unknown as E;
 	}
 	if (!(elem instanceof elementConstructor)) {
 		const expectedTypeName = elementConstructor.name;
