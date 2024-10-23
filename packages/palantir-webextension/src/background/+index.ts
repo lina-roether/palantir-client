@@ -119,9 +119,19 @@ async function joinRoom(id: string, password: string) {
 	}
 }
 
+const SESSION_CLOSE_TIMEOUT = 10000;
+
+function closeSession() {
+		session?.close("User left room");
+		session = null;
+}
+
 function leaveRoom() {
 	try {
 		session?.leaveRoom();
+		setTimeout(() => {
+			if (!session?.isInRoom()) closeSession();
+		}, SESSION_CLOSE_TIMEOUT);
 	} catch (e) {
 		sendError(`Failed to leave room: ${errorMessage(e)}`);
 		session = null;
