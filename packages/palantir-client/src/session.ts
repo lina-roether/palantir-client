@@ -186,6 +186,7 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 
 	public close(message: string) {
 		if (!this.open) return;
+		this.connection.close(message);
 		logger.info(`Session closed: ${message}`);
 		this.dispatchEvent(new ClosedEvent(message));
 	}
