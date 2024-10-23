@@ -77,6 +77,7 @@ export class Connection extends TypedEventTarget<ConnectionEventMap> {
 
 	public close(message: string) {
 		this.channel.close();
+		this.stopKeepalive();
 		this.state = ConnectionState.DISCONNECTED;
 		this.dispatchEvent(new ClosedEvent(message));
 	}
