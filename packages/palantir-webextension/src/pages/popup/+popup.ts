@@ -101,7 +101,7 @@ async function initStartSession(elem: HTMLElement) {
 			roomPassword: {
 				value: "",
 				validate: (value) => {
-					if (!value) return "Pleaser enter a room password";
+					if (!value) return "Please enter a room password";
 					if (typeof value !== "string") return "Only text values are allowed";
 					if (value.length < 5) return "Password must be at least 5 characters";
 					return "";
