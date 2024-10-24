@@ -30,7 +30,7 @@ export function initComponent<E extends Element>(
 					handler(addedComponent);
 				}
 			}
-			if (!cleanup) return;
+			if (!cleanup) continue;
 			for (const removedNode of record.removedNodes) {
 				if (!(removedNode instanceof Element)) continue;
 
