@@ -1,5 +1,11 @@
 import type { Logger } from "@just-log/core";
 
+const mutationHandlers: MutationCallback[] = [];
+const observer = new MutationObserver((records, observer) => {
+	for (const handler of mutationHandlers) handler(records, observer);
+})
+observer.observe(document.body, { childList: true, subtree: true });
+
 export function initComponent<E extends Element>(
 	logger: Logger,
 	query: string,
@@ -16,7 +22,7 @@ export function initComponent<E extends Element>(
 		handler(elem);
 	}
 
-	const observer = new MutationObserver((records) => {
+	const mutationCallback: MutationCallback = (records) => {
 		for (const record of records) {
 			for (const addedNode of record.addedNodes) {
 				if (!(addedNode instanceof Element)) continue;
@@ -45,7 +51,6 @@ export function initComponent<E extends Element>(
 				}
 			}
 		}
-	});
-
-	observer.observe(document.body, { childList: true, subtree: true });
+	};
+	mutationHandlers.push(mutationCallback);
 }
