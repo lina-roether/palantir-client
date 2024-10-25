@@ -1,0 +1,10 @@
+extends ../layout.pug
+
+block append head
+  title Palantir action handler
+
+block content
+  div(class="copy-100" id="action__error")
+
+block append scripts
+  script(src=include("pages/action/+action.ts"))

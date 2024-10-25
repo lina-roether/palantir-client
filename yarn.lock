@@ -2296,6 +2296,7 @@ __metadata:
     "@just-log/browser": "npm:^0.2.0"
     "@just-log/core": "npm:^0.2.0"
     "@just-log/node": "npm:^0.2.0"
+    "@msgpack/msgpack": "npm:^3.0.0-beta2"
     "@types/firefox-webext-browser": "npm:^120.0.4"
     "@types/pug": "npm:^2.0.10"
     esbuild: "npm:^0.24.0"
