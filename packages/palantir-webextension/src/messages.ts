@@ -44,7 +44,12 @@ export const SessionStateMessageSchema = z.object({
 export const SessionErrorMessageSchema = z.object({
 	type: z.literal("session_error"),
 	message: z.string()
-})
+});
+
+export const SessionInfoMessageSchema = z.object({
+	type: z.literal("session_info"),
+	message: z.string()
+});
 
 export const MessageSchema = z.discriminatedUnion("type", [
 	OptionsChangedMessageSchema,
@@ -53,7 +58,8 @@ export const MessageSchema = z.discriminatedUnion("type", [
 	LeaveRoomMessageSchema,
 	GetSessionStateMessageSchema,
 	SessionStateMessageSchema,
-	SessionErrorMessageSchema
+	SessionErrorMessageSchema,
+	SessionInfoMessageSchema
 ]);
 
 export type Message = z.infer<typeof MessageSchema>;

@@ -45,6 +45,9 @@ export interface SessionEventMap {
 	"update": UpdateEvent,
 	"closed": ClosedEvent,
 	"error": ErrorEvent,
+	"roomcreated": TypedEvent<"roomcreated">,
+	"roomjoined": TypedEvent<"roomjoined">,
+	"roomleft": TypedEvent<"roomleft">
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -56,7 +59,8 @@ export const enum State {
 	CREATING,
 	CREATED,
 	JOINED,
-	LEAVING
+	LEAVING,
+	CLOSED,
 }
 
 export interface RoomInit {
@@ -95,6 +99,7 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 	public roomConnectionStatus(): RoomConnectionStatus {
 		switch (this.state) {
 			case State.INITIAL:
+			case State.CLOSED:
 				return RoomConnectionStatus.NOT_IN_ROOM;
 			case State.JOINING:
 			case State.CREATING:
@@ -151,6 +156,7 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 			if (this.state == State.CREATING) {
 				this.state = State.INITIAL;
 				logger.error(`Timed out while creating room`);
+				this.dispatchEvent(new ErrorEvent("Connection timed out"));
 			}
 		}, ACK_TIMEOUT)
 	}
@@ -166,6 +172,7 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 			if (this.state == State.JOINING) {
 				this.state = State.INITIAL;
 				logger.error(`Timed out while joining room`);
+				this.dispatchEvent(new ErrorEvent("Connection timed out"));
 			}
 		}, ACK_TIMEOUT)
 	}
@@ -180,12 +187,14 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 			if (this.state == State.LEAVING) {
 				this.state = State.INITIAL;
 				logger.error(`Timed out while leaving room`);
+				this.dispatchEvent(new ErrorEvent("Connection timed out"));
 			}
 		}, ACK_TIMEOUT)
 	}
 
 	public close(message: string) {
 		if (!this.open) return;
+		this.state = State.CLOSED;
 		this.connection.close(message);
 		logger.info(`Session closed: ${message}`);
 		this.dispatchEvent(new ClosedEvent(message));
@@ -207,6 +216,8 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 	private onRoomJoined() {
 		logger.info(`Successfully joined room`);
 		this.state = State.JOINED;
+		this.requestRoomState();
+		this.dispatchEvent(new TypedEvent("roomjoined"));
 		this.broadcastStateUpdate();
 	}
 
@@ -214,12 +225,14 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		logger.info(`Successfully created room`);
 		this.state = State.CREATED;
 		this.requestRoomState();
+		this.dispatchEvent(new TypedEvent("roomcreated"));
 		this.broadcastStateUpdate();
 	}
 
 	private onRoomLeft() {
 		logger.info(`Successfully left room`);
 		this.state = State.INITIAL;
+		this.dispatchEvent(new TypedEvent("roomleft"));
 		this.broadcastStateUpdate();
 	}
 
@@ -293,10 +306,16 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		// Interpret error as failing the pending operation
 		if (this.state == State.JOINING || this.state == State.CREATING || this.state == State.LEAVING) {
 			this.state = State.INITIAL;
+			this.broadcastStateUpdate();
 		}
 	}
 
 	private onConnectionClosed(message: string) {
+		if (this.state !== State.CLOSED) {
+			this.dispatchEvent(new ErrorEvent("Server connection failed"));
+			this.state = State.CLOSED;
+			this.broadcastStateUpdate();
+		}
 		this.close(message);
 	}
 }

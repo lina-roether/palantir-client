@@ -6,6 +6,7 @@ import { assertElement } from "../../utils/query";
 import { runPromise } from "../../utils/error";
 import { FormMode, initForm } from "../../utils/form";
 import { RoomConnectionStatus, type SessionState } from "palantir-client";
+import { snackbar } from "../../fragments/components";
 
 const logger = baseLogger.sub("page", "popup");
 
@@ -31,6 +32,12 @@ port.onMessage.addListener((obj) => {
 	switch (message.type) {
 		case "session_state":
 			onSessionStateUpdate(message);
+			break;
+		case "session_info":
+			onSessionInfo(message.message);
+			break;
+		case "session_error":
+			onSessionError(message.message);
 	}
 });
 port.postMessage({ type: "get_session_state" } satisfies Message);
@@ -52,6 +59,20 @@ const stateController = initStateContainer(logger, "#popup__content", {
 		handler: initInRoom
 	}
 });
+
+function onSessionInfo(message: string) {
+	snackbar.queueSnackbar({
+		type: snackbar.SnackbarType.INFO,
+		message
+	});
+}
+
+function onSessionError(message: string) {
+	snackbar.queueSnackbar({
+		type: snackbar.SnackbarType.ERROR,
+		message
+	});
+}
 
 let sessionState: SessionState | null = null;
 

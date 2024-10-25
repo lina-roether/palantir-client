@@ -17,7 +17,12 @@ function startSession(options: SessionOptions) {
 	logger.info("Starting new session");
 	stopSession("Superseded by another session");
 	session = new Session(options);
+	session.addEventListener("error", (evt) => { sendError(evt.message); });
 	session.addEventListener("update", onSessionUpdate);
+	session.addEventListener("roomjoined", () => { sendInfo("Room joined"); });
+	session.addEventListener("roomcreated", () => { sendInfo("Room created"); })
+	session.addEventListener("roomleft", () => { sendInfo("Room left"); })
+	session.addEventListener("closed", onSessionClosed);
 }
 
 function stopSession(message: string) {
@@ -30,11 +35,19 @@ function onSessionUpdate() {
 	events.dispatchEvent(new Event("update"));
 }
 
+function onSessionClosed() {
+	session = null;
+	onSessionUpdate();
+}
+
+function sendInfo(message: string) {
+	logger.info(`Session info: ${message}`);
+	events.dispatchEvent(new CustomEvent("info", { detail: message }));
+}
+
 function sendError(message: string) {
 	logger.error(`Session error: ${message}`);
-	events.dispatchEvent(new CustomEvent("error", {
-		detail: message
-	}))
+	events.dispatchEvent(new CustomEvent("error", { detail: message }));
 }
 
 async function startSessionFromOptions() {
@@ -122,8 +135,8 @@ async function joinRoom(id: string, password: string) {
 const SESSION_CLOSE_TIMEOUT = 10000;
 
 function closeSession() {
-		session?.close("User left room");
-		session = null;
+	session?.close("User left room");
+	session = null;
 }
 
 function leaveRoom() {
@@ -144,7 +157,10 @@ function postSessionState(port: browser.runtime.Port) {
 
 function postSessionError(port: browser.runtime.Port, message: string) {
 	port.postMessage({ type: "session_error", message } as Message);
+}
 
+function postSessionInfo(port: browser.runtime.Port, message: string) {
+	port.postMessage({ type: "session_info", message } as Message);
 }
 
 browser.runtime.onConnect.addListener((port) => {
@@ -152,17 +168,22 @@ browser.runtime.onConnect.addListener((port) => {
 
 	const updateListener = () => {
 		postSessionState(port);
+	};
+	const infoListener = (evt: CustomEvent) => {
+		postSessionInfo(port, evt.detail as string);
 	}
 	const errorListener = (evt: CustomEvent) => {
 		postSessionError(port, evt.detail as string);
 	};
 	events.addEventListener("update", updateListener);
+	events.addEventListener("info", infoListener as EventListener);
 	events.addEventListener("error", errorListener as EventListener);
 
 
 	port.onDisconnect.addListener(() => {
 		logger.debug(`Port '${port.name}' disconnected`);
 		events.removeEventListener("update", updateListener);
+		events.removeEventListener("info", infoListener as EventListener);
 		events.removeEventListener("error", errorListener as EventListener);
 	});
 
