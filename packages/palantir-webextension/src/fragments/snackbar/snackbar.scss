@@ -8,6 +8,12 @@
   border: none;
   padding: var(--theme-spacing-50) var(--theme-spacing-100);
   box-shadow: var(--theme-fire-100);
+  transition: top var(--base-duration-100) ease-in-out;
+
+  &:not([open]) {
+    display: block;
+    top: -100%;
+  }
 
   &__content {
     padding: var(--theme-spacing-50) var(--theme-spacing-100);
