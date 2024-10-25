@@ -1,0 +1,27 @@
+.palantir-snackbar {
+  position: fixed;
+  top: var(--theme-spacing-50);
+  left: 50%;
+  max-width: calc(100% - var(--theme-spacing-100));
+  transform: translateX(-50%);
+  z-index: 1;
+  border: none;
+  padding: var(--theme-spacing-50) var(--theme-spacing-100);
+  box-shadow: var(--theme-fire-100);
+
+  &__content {
+    padding: var(--theme-spacing-50) var(--theme-spacing-100);
+    border-left: var(--theme-border-width-50) var(--theme-color-primary-100) dashed;
+    border-right: var(--theme-border-width-50) var(--theme-color-primary-100) dashed;
+  }
+
+  &--info {
+    background-color: var(--theme-color-background-300);
+    color: var(--theme-color-text-100);
+  }
+
+  &--error {
+    background-color: var(--theme-color-error-100);
+    color: var(--theme-color-text-100);
+  }
+}

@@ -58,5 +58,10 @@ block content
       +palantir-input-row("ui-preview__disabled-checkbox", "Disabled checkbox (unchecked)") 
         +palantir-checkbox()(id="ui-preview__disabled-checkbox" disabled)
 
+    +palantir-card("Snackbar", 2)
+      div(class="ui-preview__row")
+        +palantir-button("primary")(id="ui-preview__open-info-snackbar") Open info snackbar
+        +palantir-button("primary")(id="ui-preview__open-error-snackbar") Open error snackbar
+
 block append scripts
   script(src=include("pages/ui-preview/+ui_preview.ts"))

@@ -11,8 +11,8 @@ export const enum SnackbarType {
 }
 
 const TYPE_CLASSES: Record<SnackbarType, string> = {
-	[SnackbarType.INFO]: "snackbar--info",
-	[SnackbarType.ERROR]: "snackbar--error"
+	[SnackbarType.INFO]: "palantir-snackbar--info",
+	[SnackbarType.ERROR]: "palantir-snackbar--error"
 }
 
 function setSnackbarType(type: SnackbarType) {
@@ -48,7 +48,6 @@ const SNACKBAR_SHOW_DURATION = 5000;
 const SNACKBAR_SHOW_DELAY = 500;
 
 function showQueuedSnackbar() {
-	if (queueActive) return;
 	const init = snackbarQueue.shift();
 	if (!init) {
 		queueActive = false;
@@ -66,5 +65,5 @@ function hideQueuedSnackbar() {
 
 export function queueSnackbar(init: SnackbarInit) {
 	snackbarQueue.push(init);
-	showQueuedSnackbar();
+	if (!queueActive) showQueuedSnackbar();
 }
