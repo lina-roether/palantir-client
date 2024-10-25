@@ -10,6 +10,7 @@ html
       link(rel="icon" href=asset("images/favicon.ico"))
       link(rel="stylesheet" href=include("pages/+common.scss"))
   body
+    +palantir-snackbar-container()
     block content
     block scripts
       script(src=include("+common.ts"))
