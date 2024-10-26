@@ -4,7 +4,7 @@ import * as msgpack from "@msgpack/msgpack";
 export const ActionParamsSchema = z.object({
 	action: z.literal("join"),
 	server: z.string(),
-	roomId: z.instanceof(Uint8Array),
+	roomId: z.string()
 });
 
 export type ActionParams = z.infer<typeof ActionParamsSchema>;

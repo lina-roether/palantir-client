@@ -2,9 +2,20 @@ extends ../layout.pug
 
 block append head
   title Palantir action handler
+  link(rel="stylesheet" href=include("pages/action/+styles.scss"))
 
 block content
-  div(class="copy-100" id="action__error")
+  div(id="action__content")
+  template(id="action__template-error")
+    +palantir-card("Invalid URL")(class="action__card")
+      div(class="js_action__error-message")
+  template(id="action__template-join-room")
+    +palantir-card("Join room")(class="action__card")
+      form(id="action__join-room-form")
+        +palantir-input-row("action__join-room-password", "Password")
+          +palantir-text-field()(id="action__join-room-password", name="Password")
+        +palantir-form-actions()
+          +palantir-button("primary")(class="js_action__join-room" type="submit") Join room
 
 block append scripts
   script(src=include("pages/action/+action.ts"))
