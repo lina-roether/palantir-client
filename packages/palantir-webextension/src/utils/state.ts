@@ -1,59 +1,73 @@
 import type { Logger } from "@just-log/core";
 import { assertElement } from "./query";
+import { runPromise } from "./error";
 
-export type StateHandler = (container: HTMLElement) => void;
+export type StateHandler<P = undefined> = (elem: HTMLElement, props: P) => void | Promise<void>;
 
-export interface StateDefinition {
+export interface StateDefinition<P> {
 	template: string,
-	handler?: StateHandler
+	handler?: StateHandler<P>
 }
 
-export type StateMap<T extends string | number> = Record<T, string | StateDefinition>;
+export type StateDefinitions = Record<string, StateDefinition<never>>;
+export type StateTypeMap<D extends StateDefinitions> = { [S in keyof D]: D[S]["handler"] extends StateHandler<infer P> ? P : undefined }
 
-export class StateController<T extends string | number> {
+type StateTemplates<M> = Record<keyof M, HTMLTemplateElement>;
+type StateHandlers<M> = { [S in keyof M]: StateHandler<M[S]> };
+
+type ProplessStates<M> = keyof { [S in keyof M as M[S] extends undefined ? S : never]: undefined };
+
+export class StateController<M> {
 	private logger: Logger;
 	private container: HTMLElement;
-	private state: T | null = null;
-	private templates: Record<T, HTMLTemplateElement>;
-	private handlers: Record<T, StateHandler | undefined>
+	private state: keyof M | null = null;
+	private templates: StateTemplates<M>;
+	private handlers: StateHandlers<M>;
 
-	constructor(logger: Logger, container: HTMLElement, templates: Record<T, HTMLTemplateElement>, handlers: Record<T, StateHandler | undefined>) {
+	constructor(logger: Logger, container: HTMLElement, templates: StateTemplates<M>, handlers: StateHandlers<M>) {
 		this.logger = logger;
 		this.container = container;
 		this.templates = templates;
 		this.handlers = handlers;
 	}
 
-	public getState(): T | null {
+	public getState(): keyof M | null {
 		return this.state;
 	}
 
-	public setState(state: T) {
+	public setState(state: ProplessStates<M>): void
+	public setState<S extends keyof M>(state: S, props: M[S]): void
+	public setState<S extends keyof M>(state: S, props?: M[S]): void {
 		this.logger.debug(`Setting page state to ${state.toString()}`)
 		this.state = state;
 		this.container.innerHTML = "";
 		this.container.appendChild(this.templates[state].content.cloneNode(true));
-		this.handlers[state]?.(this.container);
+		const promiseOrVoid = this.handlers[state](
+			this.container,
+			props as never
+		);
+		if (promiseOrVoid instanceof Promise)
+			runPromise(this.logger, promiseOrVoid, "Failed to run state handler");
 	}
 }
 
-export function initStateContainer<T extends string>(logger: Logger, container: string, definitions: StateMap<T>) {
+export function initStateContainer<D extends StateDefinitions>(logger: Logger, container: string, definitions: D): StateController<StateTypeMap<D>> {
 	const containerElement = assertElement(logger, container, HTMLElement);
-	const templateElements: Partial<Record<T, HTMLTemplateElement>> = {};
-	const stateHandlers: Partial<Record<T, StateHandler | undefined>> = {};
+	const templateElements: Partial<StateTemplates<StateTypeMap<D>>> = {};
+	const stateHandlers: Partial<StateHandlers<StateTypeMap<D>>> = {};
 	for (const state in definitions) {
 		const def = definitions[state];
 		if (typeof def == "string") {
 			templateElements[state] = assertElement(logger, def, HTMLTemplateElement);
 		} else {
 			templateElements[state] = assertElement(logger, def.template, HTMLTemplateElement);
-			stateHandlers[state] = def.handler;
+			stateHandlers[state] = def.handler as never;
 		}
 	}
 	return new StateController(
 		logger,
 		containerElement,
-		templateElements as Record<T, HTMLTemplateElement>,
-		stateHandlers as Record<T, StateHandler | undefined>
+		templateElements as StateTemplates<StateTypeMap<D>>,
+		stateHandlers as StateHandlers<StateTypeMap<D>>
 	);
 }

@@ -1,6 +1,6 @@
 import { getOptions } from "../../options";
 import { baseLogger } from "../../logger";
-import { initStateContainer } from "../../utils/state";
+import { initStateContainer, type StateHandler, } from "../../utils/state";
 import { MessageSchema, type Message } from "../../messages";
 import { assertElement } from "../../utils/query";
 import { runPromise } from "../../utils/error";
@@ -42,23 +42,6 @@ port.onMessage.addListener((obj) => {
 });
 port.postMessage({ type: "get_session_state" } satisfies Message);
 
-const stateController = initStateContainer(logger, "#popup__content", {
-	[State.LOADING]: {
-		template: "#popup__template-loading",
-	},
-	[State.INCOMPLETE_OPTIONS]: {
-		template: "#popup__template-options-incomplete",
-		handler: initIncompleteOptions,
-	},
-	[State.CREATE_ROOM]: {
-		template: "#popup__template-create-room",
-		handler: (elem) => { runPromise(logger, initStartSession(elem), "Failed to initialize page"); },
-	},
-	[State.IN_ROOM]: {
-		template: "#popup__template-in-room",
-		handler: initInRoom
-	}
-});
 
 function onSessionInfo(message: string) {
 	snackbar.queueSnackbar({
@@ -74,17 +57,14 @@ function onSessionError(message: string) {
 	});
 }
 
-let sessionState: SessionState | null = null;
-
 function onSessionStateUpdate(state: SessionState) {
 	logger.debug(`Received session state update: ${JSON.stringify(state)}`);
-	sessionState = state;
 	switch (state.roomConnectionStatus) {
 		case RoomConnectionStatus.NOT_IN_ROOM:
 			stateController.setState(State.CREATE_ROOM);
 			break;
 		case RoomConnectionStatus.IN_ROOM:
-			stateController.setState(State.IN_ROOM);
+			stateController.setState(State.IN_ROOM, state);
 			break;
 		case RoomConnectionStatus.JOINING:
 		case RoomConnectionStatus.LEAVING:
@@ -92,7 +72,12 @@ function onSessionStateUpdate(state: SessionState) {
 	}
 }
 
-function initInRoom(elem: HTMLElement) {
+const initInRoom: StateHandler<SessionState> = (elem, sessionState) => {
+	const roomInfo = assertElement(logger, ".js_popup__room-info", HTMLElement, elem);
+	const roomInfoPre = document.createElement("pre");
+	roomInfoPre.innerText = JSON.stringify(sessionState, null, 3);
+	roomInfo.appendChild(roomInfoPre);
+
 	const leaveRoomButton = assertElement(logger, ".js_popup__leave-room", HTMLButtonElement, elem);
 	leaveRoomButton.addEventListener("click", () => {
 		port.postMessage({ type: "leave_room" } satisfies Message);
@@ -100,7 +85,7 @@ function initInRoom(elem: HTMLElement) {
 	});
 }
 
-async function initStartSession(elem: HTMLElement) {
+const initStartSession: StateHandler = async (elem) => {
 	const openOptionsButton = assertElement(logger, ".js_popup__open-options", HTMLButtonElement, elem);
 	const serverUrlElem = assertElement(logger, ".js_popup__server-url", HTMLElement, elem);
 	const usernameElem = assertElement(logger, ".js_popup__username", HTMLElement, elem);
@@ -149,10 +134,28 @@ async function initStartSession(elem: HTMLElement) {
 	usernameElem.innerText = options.username ?? "<no username set>";
 }
 
-function initIncompleteOptions(elem: HTMLElement) {
+const initIncompleteOptions: StateHandler = (elem) => {
 	const openOptionsButton = assertElement(logger, ".js_popup__open-options", HTMLButtonElement, elem);
 	initOpenOptionsButton(openOptionsButton);
 }
+
+const stateController = initStateContainer(logger, "#popup__content", {
+	[State.LOADING]: {
+		template: "#popup__template-loading",
+	},
+	[State.INCOMPLETE_OPTIONS]: {
+		template: "#popup__template-options-incomplete",
+		handler: initIncompleteOptions,
+	},
+	[State.CREATE_ROOM]: {
+		template: "#popup__template-create-room",
+		handler: initStartSession
+	},
+	[State.IN_ROOM]: {
+		template: "#popup__template-in-room",
+		handler: initInRoom
+	}
+});
 
 async function setInitialState() {
 	const options = await getOptions();
