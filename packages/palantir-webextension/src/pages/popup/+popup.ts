@@ -7,6 +7,7 @@ import { runPromise } from "../../utils/error";
 import { FormMode, initForm } from "../../utils/form";
 import { RoomConnectionStatus, type SessionState } from "palantir-client";
 import { snackbar } from "../../fragments/components";
+import { createJoinUrl } from "../../utils/join_url";
 
 const logger = baseLogger.sub("page", "popup");
 
@@ -31,7 +32,7 @@ port.onMessage.addListener((obj) => {
 	const message = MessageSchema.parse(obj);
 	switch (message.type) {
 		case "session_state":
-			onSessionStateUpdate(message);
+			runPromise(logger, onSessionStateUpdate(message), "Error while handling session state update");
 			break;
 		case "session_info":
 			onSessionInfo(message.message);
@@ -57,8 +58,19 @@ function onSessionError(message: string) {
 	});
 }
 
-function onSessionStateUpdate(state: SessionState) {
+async function optionsComplete(): Promise<boolean> {
+	const options = await getOptions();
+	return options.serverUrl !== undefined && options.username !== undefined;
+}
+
+async function onSessionStateUpdate(state: SessionState) {
 	logger.debug(`Received session state update: ${JSON.stringify(state)}`);
+
+	if (!(await optionsComplete())) {
+		stateController.setState(State.INCOMPLETE_OPTIONS);
+		return;
+	}
+
 	switch (state.roomConnectionStatus) {
 		case RoomConnectionStatus.NOT_IN_ROOM:
 			stateController.setState(State.CREATE_ROOM);
@@ -72,11 +84,19 @@ function onSessionStateUpdate(state: SessionState) {
 	}
 }
 
-const initInRoom: StateHandler<SessionState> = (elem, sessionState) => {
+const initInRoom: StateHandler<SessionState> = async (elem, sessionState) => {
+	const options = await getOptions();
+	if (!options.serverUrl || !sessionState.roomData) return;
+
 	const roomInfo = assertElement(logger, ".js_popup__room-info", HTMLElement, elem);
-	const roomInfoPre = document.createElement("pre");
-	roomInfoPre.innerText = JSON.stringify(sessionState, null, 3);
-	roomInfo.appendChild(roomInfoPre);
+	const roomLinkElem = document.createElement("a");
+	const roomUrl = createJoinUrl({
+		server: new URL(options.serverUrl),
+		roomId: sessionState.roomData.id
+	});
+	roomLinkElem.innerText = roomUrl.toString();
+	roomLinkElem.href = roomUrl.toString();
+	roomInfo.appendChild(roomLinkElem);
 
 	const leaveRoomButton = assertElement(logger, ".js_popup__leave-room", HTMLButtonElement, elem);
 	leaveRoomButton.addEventListener("click", () => {
@@ -130,7 +150,7 @@ const initStartSession: StateHandler = async (elem) => {
 	})
 
 	const options = await getOptions();
-	serverUrlElem.innerText = options.serverUrl ?? "<no url set>";
+	serverUrlElem.innerText = options.serverUrl?.toString() ?? "<no url set>";
 	usernameElem.innerText = options.username ?? "<no username set>";
 }
 
@@ -158,8 +178,7 @@ const stateController = initStateContainer(logger, "#popup__content", {
 });
 
 async function setInitialState() {
-	const options = await getOptions();
-	if (!options.username || !options.username) {
+	if (!(await optionsComplete())) {
 		stateController.setState(State.INCOMPLETE_OPTIONS);
 	} else {
 		stateController.setState(State.CREATE_ROOM)
