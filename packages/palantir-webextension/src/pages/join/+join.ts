@@ -1,11 +1,11 @@
 import { baseLogger } from "../../logger";
 import { getOptions } from "../../options";
-import { decodeActionParams, type ActionParams } from "../../utils/action";
 import { runPromise } from "../../utils/error";
+import { decodeJoinUrl, type JoinUrlData } from "../../utils/join_url";
 import { assertElement } from "../../utils/query";
 import { initStateContainer, type StateHandler } from "../../utils/state";
 
-const logger = baseLogger.sub("pages", "action");
+const logger = baseLogger.sub("pages", "join");
 
 const enum State {
 	ERROR = "error",
@@ -17,7 +17,7 @@ interface ErrorProps {
 }
 
 const initError: StateHandler<ErrorProps> = (elem, { message }) => {
-	const messageElem = assertElement(logger, ".js_action__error-message", HTMLElement, elem);
+	const messageElem = assertElement(logger, ".js_join__error-message", HTMLElement, elem);
 	messageElem.innerText = message;
 }
 
@@ -29,22 +29,21 @@ const initJoinRoom: StateHandler<JoinRoomProps> = (elem, { roomId }) => {
 	// TODO
 }
 
-const stateController = initStateContainer(logger, "#action__content", {
+const stateController = initStateContainer(logger, "#join__content", {
 	[State.ERROR]: {
-		template: "#action__template-error",
+		template: "#join__template-error",
 		handler: initError
 	},
 	[State.JOIN_ROOM]: {
-		template: "#action__template-join-room",
+		template: "#join__template-join-room",
 		handler: initJoinRoom
 	}
 })
 
-function getParamString(): string {
+function getUrl(): URL {
 	if (!location.hash.startsWith("#"))
-		throw new Error("Missing action parameter string");
-	const url = new URL(decodeURIComponent(location.hash.substring(1)));
-	return url.pathname
+		throw new Error("Missing join parameter string");
+	return new URL(decodeURIComponent(location.hash.substring(1)));
 }
 
 function sendError(message: string) {
@@ -54,21 +53,22 @@ function sendError(message: string) {
 	});
 }
 
-function getActionParams(): ActionParams {
-	const paramString = getParamString();
-	const params = decodeActionParams(paramString);
-	return params;
+function getJoinData(): JoinUrlData {
+	const url = getUrl();
+	const data = decodeJoinUrl(url);
+	return data;
 }
 
 async function setInitialState() {
 	const options = await getOptions();
 	try {
-		const params = getActionParams();
-		if (params.server !== options.serverUrl) {
+		const data = getJoinData();
+		logger.debug(`Join data: ${JSON.stringify(data)}`)
+		if (data.server.toString() !== options.serverUrl) {
 			throw new Error("This room is on a different server!");
 		}
 		stateController.setState(State.JOIN_ROOM, {
-			roomId: params.roomId
+			roomId: data.roomId
 		})
 	} catch (err) {
 		sendError(err?.toString() ?? "Unknown error");

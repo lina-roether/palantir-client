@@ -58,7 +58,7 @@ export default (context) => ({
 		{
 			protocol: "ext+palantir",
 			name: "Palantir",
-			uriTemplate: `${context.include("pages/action/+index.pug")}#%s`
+			uriTemplate: `${context.include("pages/join/+index.pug")}#%s`
 		}
 	]
 })
