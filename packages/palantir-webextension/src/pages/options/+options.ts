@@ -71,14 +71,14 @@ function validateApiKey(value: FormDataEntryValue | null) {
 
 function onSubmit(data: FormData) {
 	const username = (data.get("username") ?? "") as string;
-	const serverUrl = (data.get("serverUrl") ?? "") as string;
+	const serverUrl = new URL((data.get("serverUrl") ?? "") as string);
 	const useApiKey = !!data.get("useApiKey");
 	const apiKey = (data.get("apiKey") ?? "") as string;
 
 
 	runPromise(
 		logger,
-		setOptions({ username, serverUrl, apiKey: useApiKey ? apiKey : undefined }),
+		setOptions({ username, serverUrl: serverUrl.toString(), apiKey: useApiKey ? apiKey : undefined }),
 		"Failed to set options"
 	);
 	runPromise(
