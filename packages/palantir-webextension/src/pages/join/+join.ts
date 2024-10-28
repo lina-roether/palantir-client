@@ -61,6 +61,11 @@ function getJoinData(): JoinUrlData {
 
 async function setInitialState() {
 	const options = await getOptions();
+	if (!options) {
+		// TODO: report this error state better to the user
+		sendError("Options are incomplete!");
+		return;
+	}
 	try {
 		const data = getJoinData();
 		logger.debug(`Join data: ${JSON.stringify(data)}`)
