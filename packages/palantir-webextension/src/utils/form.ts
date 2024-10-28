@@ -202,7 +202,7 @@ export function initForm<F extends string>(logger: Logger, options: FormOptions<
 		evt.preventDefault();
 		const data = new FormData(form);
 		options.onSubmit?.(data);
-		runPromise(logger, updateAllFields(), "Failed to update form fields");
+		runPromise(logger, reset(), "Failed to reset form fields to updated values");
 	});
 
 	// initial setup
