@@ -1,11 +1,11 @@
-import { getOptions } from "../../options";
+import { getOptions, type Options } from "../../options";
 import { baseLogger } from "../../logger";
 import { initStateContainer, type StateHandler, } from "../../utils/state";
 import { MessageSchema, type Message } from "../../messages";
 import { assertElement } from "../../utils/query";
 import { runPromise } from "../../utils/error";
 import { FormMode, initForm } from "../../utils/form";
-import { RoomConnectionStatus, type SessionState } from "palantir-client";
+import { RoomConnectionStatus, type RoomData, type SessionState } from "palantir-client";
 import { snackbar } from "../../fragments/components";
 import { createJoinUrl } from "../../utils/join_url";
 
@@ -58,15 +58,12 @@ function onSessionError(message: string) {
 	});
 }
 
-async function optionsComplete(): Promise<boolean> {
-	const options = await getOptions();
-	return options.serverUrl !== undefined && options.username !== undefined;
-}
-
 async function onSessionStateUpdate(state: SessionState) {
 	logger.debug(`Received session state update: ${JSON.stringify(state)}`);
 
-	if (!(await optionsComplete())) {
+	const options = await getOptions();
+
+	if (!options) {
 		stateController.setState(State.INCOMPLETE_OPTIONS);
 		return;
 	}
@@ -76,7 +73,14 @@ async function onSessionStateUpdate(state: SessionState) {
 			stateController.setState(State.CREATE_ROOM);
 			break;
 		case RoomConnectionStatus.IN_ROOM:
-			stateController.setState(State.IN_ROOM, state);
+			if (!state.roomData) {
+				stateController.setState(State.LOADING);
+				break;
+			}
+			stateController.setState(State.IN_ROOM, {
+				options,
+				roomData: state.roomData
+			});
 			break;
 		case RoomConnectionStatus.JOINING:
 		case RoomConnectionStatus.LEAVING:
@@ -84,15 +88,17 @@ async function onSessionStateUpdate(state: SessionState) {
 	}
 }
 
-const initInRoom: StateHandler<SessionState> = async (elem, sessionState) => {
-	const options = await getOptions();
-	if (!options.serverUrl || !sessionState.roomData) return;
+interface InRoomProps {
+	roomData: RoomData
+	options: Options
+}
 
+const initInRoom: StateHandler<InRoomProps> = (elem, { roomData, options }) => {
 	const roomInfo = assertElement(logger, ".js_popup__room-info", HTMLElement, elem);
 	const roomLinkElem = document.createElement("a");
 	const roomUrl = createJoinUrl({
 		server: new URL(options.serverUrl),
-		roomId: sessionState.roomData.id
+		roomId: roomData.id
 	});
 	roomLinkElem.innerText = roomUrl.toString();
 	roomLinkElem.href = roomUrl.toString();
@@ -150,8 +156,8 @@ const initStartSession: StateHandler = async (elem) => {
 	})
 
 	const options = await getOptions();
-	serverUrlElem.innerText = options.serverUrl?.toString() ?? "<no url set>";
-	usernameElem.innerText = options.username ?? "<no username set>";
+	serverUrlElem.innerText = options?.serverUrl.toString() ?? "<no url set>";
+	usernameElem.innerText = options?.username ?? "<no username set>";
 }
 
 const initIncompleteOptions: StateHandler = (elem) => {
@@ -178,7 +184,7 @@ const stateController = initStateContainer(logger, "#popup__content", {
 });
 
 async function setInitialState() {
-	if (!(await optionsComplete())) {
+	if (!(await getOptions())) {
 		stateController.setState(State.INCOMPLETE_OPTIONS);
 	} else {
 		stateController.setState(State.CREATE_ROOM)

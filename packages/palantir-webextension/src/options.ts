@@ -9,15 +9,22 @@ const OptionsSchema = z.object({
 	apiKey: z.string().optional()
 })
 
-export type Options = z.infer<typeof OptionsSchema>;
+export type PartialOptions = z.infer<typeof OptionsSchema>;
 
-const DEFAULT_OPTIONS: Options = {
-	serverUrl: undefined
+export interface Options extends PartialOptions {
+	username: string,
+	serverUrl: string
 }
 
-let cachedOptions: Options | null = null;
+function optionsComplete(options: PartialOptions): options is Options {
+	return options.username !== undefined && options.serverUrl !== undefined;
+}
 
-async function getOptionsCacheMiss(): Promise<Options> {
+const DEFAULT_OPTIONS: PartialOptions = {}
+
+let cachedOptions: PartialOptions | null = null;
+
+async function getPartialOptionsCacheMiss(): Promise<PartialOptions> {
 	let result: Record<string, unknown>;
 	try {
 		logger.info("Reading synchronized options");
@@ -26,7 +33,7 @@ async function getOptionsCacheMiss(): Promise<Options> {
 		logger.error(`Failed to access storage API`, e);
 		return {};
 	}
-	let options: Options;
+	let options: PartialOptions;
 	try {
 		options = OptionsSchema.parse(result.options);
 		logger.debug(`Options are ${JSON.stringify(options)}`);
@@ -38,12 +45,18 @@ async function getOptionsCacheMiss(): Promise<Options> {
 	return options;
 }
 
-export async function getOptions(): Promise<Options> {
+async function getPartialOptions(): Promise<PartialOptions> {
 	if (cachedOptions) return cachedOptions;
-	return await getOptionsCacheMiss();
+	return await getPartialOptionsCacheMiss();
 }
 
-export async function setOptions(options: Options): Promise<void> {
+export async function getOptions(): Promise<Options | null> {
+	const options = await getPartialOptions();
+	if (!optionsComplete(options)) return null;
+	return options;
+}
+
+export async function setOptions(options: PartialOptions): Promise<void> {
 	cachedOptions = null;
 	try {
 		logger.info("Saving synchronized options");

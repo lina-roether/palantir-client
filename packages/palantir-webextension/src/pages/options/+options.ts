@@ -16,18 +16,18 @@ initForm(logger, {
 	onSubmit,
 	fields: {
 		username: {
-			value: async () => (await getOptions()).username ?? "",
+			value: async () => (await getOptions())?.username ?? "",
 			validate: validateUsername
 		},
 		serverUrl: {
-			value: async () => (await getOptions()).serverUrl ?? "",
+			value: async () => (await getOptions())?.serverUrl ?? "",
 			validate: validateServerUrl
 		},
 		useApiKey: {
-			value: async () => (await getOptions()).apiKey !== undefined,
+			value: async () => (await getOptions())?.apiKey !== undefined,
 		},
 		apiKey: {
-			value: async () => (await getOptions()).apiKey ?? "",
+			value: async () => (await getOptions())?.apiKey ?? "",
 			validate: validateApiKey
 		}
 	}
