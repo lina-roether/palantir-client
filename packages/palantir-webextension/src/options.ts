@@ -1,5 +1,6 @@
 import * as z from "zod";
 import { baseLogger } from "./logger";
+import { requestHostPermissions } from "./utils/permissions";
 
 const logger = baseLogger.sub("options");
 
@@ -57,6 +58,15 @@ export async function getOptions(): Promise<Options | null> {
 }
 
 export async function setOptions(options: PartialOptions): Promise<void> {
+	if (options.serverUrl) {
+		try {
+			const received = await requestHostPermissions(new URL(options.serverUrl));
+			if (!received)
+				throw new Error("Required permissions for options change not received");
+		} catch(e) {
+			logger.error(`Failed to request host permissions`, e);
+		}
+	}
 	cachedOptions = null;
 	try {
 		logger.info("Saving synchronized options");

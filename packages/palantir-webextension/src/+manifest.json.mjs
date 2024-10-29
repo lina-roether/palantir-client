@@ -21,6 +21,7 @@ export default (context) => ({
 		"96": context.asset("images/icon-96.png")
 	},
 	permissions: ["tabs", "storage"],
+	optional_host_permissions: ["<all_urls>"],
 	content_security_policy: {
 		extension_pages: per_environment(context, {
 			prod: "default-src 'self'; upgrade-insecure-requests; connect-src ws: wss:",
