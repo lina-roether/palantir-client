@@ -1,7 +1,10 @@
 import type { Logger } from "@just-log/core";
 
 export function errorMessage(error: unknown): string {
-	return error?.toString() ?? "Unknown error";
+	if (error instanceof Error) {
+		return error.message;
+	}
+	return JSON.stringify(error);
 }
 
 export function runPromise(logger: Logger, promise: Promise<unknown>, errorMessage: string): void {
