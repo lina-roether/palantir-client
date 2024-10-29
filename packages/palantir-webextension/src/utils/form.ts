@@ -17,7 +17,7 @@ export interface FormFieldOptions {
 export interface FormOptions<F extends string> {
 	query: string;
 	mode?: FormMode;
-	onSubmit?: (data: FormData) => void;
+	onSubmit?: (data: FormData) => boolean | undefined | Promise<boolean | undefined>;
 	resetButton?: string;
 	fields: Partial<Record<F, FormFieldOptions>>;
 }
@@ -201,8 +201,16 @@ export function initForm<F extends string>(logger: Logger, options: FormOptions<
 	form.addEventListener("submit", (evt) => {
 		evt.preventDefault();
 		const data = new FormData(form);
-		options.onSubmit?.(data);
-		runPromise(logger, reset(), "Failed to reset form fields to updated values");
+		let submitPromise = options.onSubmit?.(data) ?? Promise.resolve();
+		if (!(submitPromise instanceof Promise)) submitPromise = Promise.resolve(submitPromise);
+		const promise = submitPromise.then(async (cancel: unknown) => {
+			if (cancel !== false) await reset();
+		});
+		runPromise(
+			logger,
+			promise,
+			"Failed to run submit handler"
+		);
 	});
 
 	// initial setup
