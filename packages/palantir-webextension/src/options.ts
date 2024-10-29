@@ -65,6 +65,7 @@ export async function setOptions(options: PartialOptions): Promise<void> {
 				throw new Error("Required permissions for options change not received");
 		} catch(e) {
 			logger.error(`Failed to request host permissions`, e);
+			throw new Error("Required permissions not received");
 		}
 	}
 	cachedOptions = null;
@@ -74,6 +75,7 @@ export async function setOptions(options: PartialOptions): Promise<void> {
 		await browser.storage.sync.set({ options });
 	} catch (e) {
 		logger.error(`Failed to access storage API`, e);
+		throw new Error("Failed to access storage API");
 	}
 }
 

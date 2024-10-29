@@ -2,7 +2,8 @@ import { getOptions, setOptions } from "../../options";
 import { assertElement } from "../../utils/query";
 import { FormMode, initForm } from "../../utils/form";
 import { baseLogger } from "../../logger";
-import { runPromise } from "../../utils/error";
+import { snackbar } from "../../fragments/components";
+import { errorMessage } from "../../utils/error";
 
 const logger = baseLogger.sub("page", "options");
 
@@ -69,23 +70,20 @@ function validateApiKey(value: FormDataEntryValue | null) {
 	return "";
 }
 
-function onSubmit(data: FormData) {
+async function onSubmit(data: FormData) {
 	const username = (data.get("username") ?? "") as string;
 	const serverUrl = new URL((data.get("serverUrl") ?? "") as string);
 	const useApiKey = !!data.get("useApiKey");
 	const apiKey = (data.get("apiKey") ?? "") as string;
 
+	try {
+		await setOptions({ username, serverUrl: serverUrl.toString(), apiKey: useApiKey ? apiKey : undefined });
+	} catch(e) {
+		snackbar.queueSnackbar({ type: snackbar.SnackbarType.INFO, message: errorMessage(e) });
+		return false;
+	}
 
-	runPromise(
-		logger,
-		setOptions({ username, serverUrl: serverUrl.toString(), apiKey: useApiKey ? apiKey : undefined }),
-		"Failed to set options"
-	);
-	runPromise(
-		logger,
-		browser.runtime.sendMessage({ type: "options_changed" }),
-		"Failed to broadcast options change"
-	);
+	await browser.runtime.sendMessage({ type: "options_changed" });
 }
 
 useApiKeyInput.addEventListener("change", () => {
