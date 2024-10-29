@@ -54,12 +54,5 @@ export default (context) => ({
 		chromium: {
 			service_worker: context.include("background/+polyfilled.ts")
 		}
-	}),
-	protocol_handlers: [
-		{
-			protocol: "ext+palantir",
-			name: "Palantir",
-			uriTemplate: `${context.include("pages/join/+index.pug")}#%s`
-		}
-	]
+	})
 })
