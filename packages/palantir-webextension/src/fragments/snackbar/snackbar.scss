@@ -1,6 +1,6 @@
 .palantir-snackbar {
   position: fixed;
-  top: var(--theme-spacing-50);
+  bottom: var(--theme-spacing-50);
   left: 50%;
   max-width: calc(100% - var(--theme-spacing-100));
   transform: translateX(-50%);
