@@ -20,7 +20,7 @@ export default (context) => ({
 		"48": context.asset("images/icon-48.png"),
 		"96": context.asset("images/icon-96.png")
 	},
-	permissions: ["tabs", "storage"],
+	permissions: ["storage"],
 	optional_host_permissions: ["<all_urls>"],
 	content_security_policy: {
 		extension_pages: per_environment(context, {
