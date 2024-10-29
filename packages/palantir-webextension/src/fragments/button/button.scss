@@ -29,18 +29,18 @@
   &__side {
     display: inline-block;
     height: 100%;
-    width: var(--theme-spacing-50);
+    width: calc(var(--theme-spacing-50) + 1px);
+    clip-path: polygon(100% 50%, 1px 100%, 0 100%, 0 0, 1px 0);
     position: absolute;
     top: 0;
 
     &--left {
       left: 0;
-      clip-path: polygon(0 50%, 100% 100%, 100% 0);
+      transform: scale(-1, 1);
     }
 
     &--right {
       right: 0;
-      clip-path: polygon(100% 50%, 0 100%, 0 0);
     }
   }
 
