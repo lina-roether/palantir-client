@@ -1,7 +1,7 @@
 $popupWidth: 500px;
 
 body {
-  width: $popupWidth;
+  min-width: $popupWidth;
 }
 
 .popup__button {

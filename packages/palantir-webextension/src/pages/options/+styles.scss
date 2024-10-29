@@ -1,3 +1,9 @@
+$optionsWidth: 600px;
+
+body {
+  min-width: $optionsWidth;
+}
+
 .options__section {
   width: 100%;
   padding-bottom: var(--theme-spacing-200);
