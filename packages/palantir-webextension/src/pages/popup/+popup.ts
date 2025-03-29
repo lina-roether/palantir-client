@@ -152,6 +152,8 @@ const initStartSession: StateHandler = async (elem) => {
 				password: roomPassword
 			} satisfies Message);
 			stateController.setState(State.LOADING);
+
+			return undefined;
 		}
 	})
 
