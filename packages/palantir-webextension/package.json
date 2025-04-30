@@ -10,7 +10,7 @@
 		"build:chromium-debug": "ENVIRONMENT=debug TARGET=chromium node build.mjs",
 		"build:chromium": "ENVIRONMENT=prod TARGET=chromium node build.mjs",
 		"build": "yarn clean && yarn build:firefox-debug && yarn build:chromium-debug",
-		"build:prod": "yarn clean && yarn build:firefox && yarn build:chromium"
+		"build:release": "yarn clean && yarn build:firefox && yarn build:chromium"
 	},
 	"dependencies": {
 		"@just-log/browser": "^0.2.0",

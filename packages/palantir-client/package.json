@@ -5,7 +5,8 @@
 	"type": "module",
 	"packageManager": "yarn@4.5.0",
 	"scripts": {
-		"build": "tsc"
+		"build": "tsc",
+		"build:release": "yarn build"
 	},
 	"dependencies": {
 		"@just-log/core": "^0.2.0",

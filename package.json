@@ -3,7 +3,8 @@
 	"packageManager": "yarn@4.5.0",
 	"scripts": {
 		"lint": "eslint",
-		"build": "yarn workspaces foreach -A run build"
+		"build": "yarn workspaces foreach -A run build",
+		"build:release": "yarn workspaces foreach -A run build:release"
 	},
 	"workspaces": [
 		"packages/*"
