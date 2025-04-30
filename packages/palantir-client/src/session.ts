@@ -1,17 +1,29 @@
 import { ClosedEvent, Connection, ConnectionOptions, ErrorEvent } from "./connection";
 import { baseLogger } from "./logger";
-import { Message, RoomStateMsgBody } from "./messages";
+import { Message, RoomPermissionsMsgBody, RoomStateMsgBody } from "./messages";
 import { TypedEvent, TypedEventTarget } from "./utils";
 import * as uuid from "uuid";
 
 const logger = baseLogger.sub("session");
 
-export type UserRole = "host" | "guest";
+export interface UserPermissions {
+	can_share: boolean,
+	can_close: boolean,
+	can_kick: boolean,
+	can_set_roles: boolean
+}
+
+export interface RoomPermissions {
+	role: UserRole,
+	permissions: UserPermissions
+}
+
+export type UserRole = "host" | "guest" | "spectator";
 
 export interface User {
 	id: string,
 	name: string,
-	role: UserRole,
+	role: UserRole
 }
 
 export interface RoomData {
@@ -30,8 +42,8 @@ export enum RoomConnectionStatus {
 
 export interface SessionState {
 	roomConnectionStatus: RoomConnectionStatus,
-	userRole?: UserRole;
 	roomData?: RoomData;
+	roomPermissions?: RoomPermissions;
 }
 
 export class UpdateEvent extends TypedEvent<"update"> {
@@ -57,7 +69,6 @@ export const enum State {
 	INITIAL,
 	JOINING,
 	CREATING,
-	CREATED,
 	JOINED,
 	LEAVING,
 	CLOSED,
@@ -73,6 +84,7 @@ const ACK_TIMEOUT = 1000;
 export class Session extends TypedEventTarget<SessionEventMap> {
 	private readonly connection: Connection;
 	private roomData: RoomData | null = null;
+	private roomPermissions: RoomPermissions | null = null;
 	private state: State = State.INITIAL;
 
 	constructor(options: SessionOptions) {
@@ -104,7 +116,6 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 			case State.JOINING:
 			case State.CREATING:
 				return RoomConnectionStatus.JOINING;
-			case State.CREATED:
 			case State.JOINED:
 				return RoomConnectionStatus.IN_ROOM;
 			case State.LEAVING:
@@ -116,29 +127,18 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		return this.roomConnectionStatus() == RoomConnectionStatus.IN_ROOM;
 	}
 
-	public getUserRole(): UserRole | undefined {
-		switch (this.state) {
-			case State.JOINING:
-			case State.JOINED:
-				return "guest";
-			case State.CREATING:
-			case State.CREATED:
-				return "host";
-			default:
-				return undefined;
-		}
-	}
-
 	public getRoomData(): RoomData | null {
 		return this.roomData;
 	}
 
 	public getState(): SessionState {
-		return {
+		const state =  {
 			roomConnectionStatus: this.roomConnectionStatus(),
-			userRole: this.getUserRole(),
-			roomData: this.roomData ?? undefined
+			roomData: this.roomData ?? undefined,
+			roomPermissions: this.roomPermissions ?? undefined
 		}
+		logger.debug(`Current session state is ${JSON.stringify(state)}`);
+		return state;
 	}
 
 	public createRoom(init: RoomInit) {
@@ -181,6 +181,7 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		if (!this.isInRoom()) return;
 		logger.info(`Leaving current room...`);
 		this.roomData = null;
+		this.roomPermissions = null;
 		this.connection.send({ m: "room::leave/v1" });
 		this.state = State.LEAVING;
 		setTimeout(() => {
@@ -209,6 +210,10 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		this.connection.send({ m: "room::request_state/v1" });
 	}
 
+	private requestRoomPermissions() {
+		this.connection.send({ m: "room::request_permissions/v1" });
+	}
+
 	private broadcastStateUpdate() {
 		this.dispatchEvent(new UpdateEvent(this.getState()));
 	}
@@ -217,15 +222,8 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		logger.info(`Successfully joined room`);
 		this.state = State.JOINED;
 		this.requestRoomState();
+		this.requestRoomPermissions();
 		this.dispatchEvent(new TypedEvent("roomjoined"));
-		this.broadcastStateUpdate();
-	}
-
-	private onRoomCreated() {
-		logger.info(`Successfully created room`);
-		this.state = State.CREATED;
-		this.requestRoomState();
-		this.dispatchEvent(new TypedEvent("roomcreated"));
 		this.broadcastStateUpdate();
 	}
 
@@ -257,6 +255,15 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		this.broadcastStateUpdate();
 	}
 
+	private updateRoomPermissions(body: RoomPermissionsMsgBody) {
+		logger.debug(`Recieved room permissions: ${JSON.stringify(body)}`)
+		this.roomPermissions = {
+			role: body.role,
+			permissions: body.permissions
+		};
+		this.broadcastStateUpdate();
+	}
+
 	private onRoomMessage(message: Message) {
 		switch (message.m) {
 			case "room::disconnected/v1":
@@ -264,6 +271,9 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 				break;
 			case "room::state/v1":
 				this.updateRoomData(message);
+				break;
+			case "room::permissions/v1":
+				this.updateRoomPermissions(message);
 				break;
 			default:
 				logger.warning(`Recieved unexpected room message '${message.m}'`);
@@ -282,11 +292,10 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 				break;
 			case State.CREATING:
 				if (message.m == "room::create_ack/v1") {
-					this.onRoomCreated();
+					this.onRoomJoined();
 					return;
 				}
 				break;
-			case State.CREATED:
 			case State.JOINED:
 				this.onRoomMessage(message);
 				return;

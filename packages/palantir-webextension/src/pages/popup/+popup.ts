@@ -8,6 +8,7 @@ import { FormMode, initForm } from "../../utils/form";
 import { RoomConnectionStatus, type RoomData, type SessionState } from "palantir-client";
 import { snackbar } from "../../fragments/components";
 import { createJoinUrl } from "../../utils/join_url";
+import type { RoomPermissions } from "../../../../palantir-client/dist/session";
 
 const logger = baseLogger.sub("page", "popup");
 
@@ -73,13 +74,14 @@ async function onSessionStateUpdate(state: SessionState) {
 			stateController.setState(State.CREATE_ROOM);
 			break;
 		case RoomConnectionStatus.IN_ROOM:
-			if (!state.roomData) {
+			if (!state.roomData || !state.roomPermissions) {
 				stateController.setState(State.LOADING);
 				break;
 			}
 			stateController.setState(State.IN_ROOM, {
 				options,
-				roomData: state.roomData
+				roomData: state.roomData,
+				roomPermissions: state.roomPermissions
 			});
 			break;
 		case RoomConnectionStatus.JOINING:
@@ -89,11 +91,12 @@ async function onSessionStateUpdate(state: SessionState) {
 }
 
 interface InRoomProps {
-	roomData: RoomData
+	roomData: RoomData,
+	roomPermissions: RoomPermissions,
 	options: Options
 }
 
-const initInRoom: StateHandler<InRoomProps> = (elem, { roomData, options }) => {
+const initInRoom: StateHandler<InRoomProps> = (elem, { roomData, roomPermissions, options }) => {
 	const roomInfo = assertElement(logger, ".js_popup__room-info", HTMLElement, elem);
 	const roomLinkElem = document.createElement("a");
 	const roomUrl = createJoinUrl({
@@ -103,6 +106,7 @@ const initInRoom: StateHandler<InRoomProps> = (elem, { roomData, options }) => {
 	roomLinkElem.innerText = roomUrl.toString();
 	roomLinkElem.href = roomUrl.toString();
 	roomInfo.appendChild(roomLinkElem);
+	roomInfo.innerHTML += `<br>${roomPermissions.role}`;
 
 	const leaveRoomButton = assertElement(logger, ".js_popup__leave-room", HTMLButtonElement, elem);
 	leaveRoomButton.addEventListener("click", () => {

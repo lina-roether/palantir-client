@@ -13,7 +13,7 @@ export type StateDefinitions = Record<string, StateDefinition<never>>;
 export type StateTypeMap<D extends StateDefinitions> = { [S in keyof D]: D[S]["handler"] extends StateHandler<infer P> ? P : undefined }
 
 type StateTemplates<M> = Record<keyof M, HTMLTemplateElement>;
-type StateHandlers<M> = { [S in keyof M]: StateHandler<M[S]> };
+type StateHandlers<M> = { [S in keyof M]: StateHandler<M[S]> | undefined };
 
 type ProplessStates<M> = keyof { [S in keyof M as M[S] extends undefined ? S : never]: undefined };
 
@@ -42,7 +42,7 @@ export class StateController<M> {
 		this.state = state;
 		this.container.innerHTML = "";
 		this.container.appendChild(this.templates[state].content.cloneNode(true));
-		const promiseOrVoid = this.handlers[state](
+		const promiseOrVoid = this.handlers[state]?.(
 			this.container,
 			props as never
 		);

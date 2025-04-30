@@ -44,13 +44,25 @@ const RoomJoinMsgBodySchema = z.object({
 });
 export type RoomJoinMsgBody = z.infer<typeof RoomJoinMsgBodySchema>;
 
-const RoomUserRoleSchema = z.enum(["host", "guest"]);
+const RoomUserRoleSchema = z.enum([
+	"host",
+	"guest",
+	"spectator"
+]);
 export type RoomUserRole = z.infer<typeof RoomUserRoleSchema>;
+
+const RoomUserPermissionsSchema = z.object({
+	can_share: z.boolean(),
+	can_close: z.boolean(),
+	can_set_roles: z.boolean(),
+	can_kick: z.boolean(),
+})
+export type RoomUserPermsissions = z.infer<typeof RoomUserPermissionsSchema>;
 
 const RoomUserSchema = z.object({
 	id: z.instanceof(Uint8Array),
 	name: z.string(),
-	role: RoomUserRoleSchema,
+	role: RoomUserRoleSchema
 });
 export type RoomUser = z.infer<typeof RoomUserSchema>;
 
@@ -62,6 +74,12 @@ const RoomStateMsgBodySchema = z.object({
 });
 export type RoomStateMsgBody = z.infer<typeof RoomStateMsgBodySchema>;
 
+const RoomPermissionsMsgBodySchema = z.object({
+	role: RoomUserRoleSchema,
+	permissions: RoomUserPermissionsSchema
+});
+export type RoomPermissionsMsgBody = z.infer<typeof RoomPermissionsMsgBodySchema>;
+
 const RoomDisconnectedReason = z.enum(["closed_by_host", "unauthorized", "server_error"]);
 export type RoomDisconnected = z.infer<typeof RoomDisconnectedReason>;
 
@@ -69,6 +87,11 @@ const RoomDisconnectedMsgBodySchema = z.object({
 	reason: RoomDisconnectedReason,
 });
 export type RoomDisconnectedMsgBody = z.infer<typeof RoomDisconnectedMsgBodySchema>;
+
+const RoomKickUserMsgBodySchema = z.object({
+	user_id: z.instanceof(Uint8Array)
+});
+export type RoomKickUserMsgBody = z.infer<typeof RoomKickUserMsgBodySchema>;
 
 const EmptyMessageBodySchema = z.object({});
 
@@ -91,6 +114,9 @@ const MessageBodySchema = z.discriminatedUnion("m", [
 	RoomDisconnectedMsgBodySchema.extend({ m: z.literal("room::disconnected/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("room::request_state/v1") }),
 	RoomStateMsgBodySchema.extend({ m: z.literal("room::state/v1") }),
+	RoomKickUserMsgBodySchema.extend({ m: z.literal("room::kick_user/v1") }),
+	EmptyMessageBodySchema.extend({ m: z.literal("room::request_permissions/v1") }),
+	RoomPermissionsMsgBodySchema.extend({ m: z.literal("room::permissions/v1") }),
 ]);
 export type MessageBody = z.infer<typeof MessageBodySchema>;
 

@@ -28,7 +28,15 @@ export const GetSessionStateMessageSchema = z.object({
 export const SessionStateMessageSchema = z.object({
 	type: z.literal("session_state"),
 	roomConnectionStatus: z.nativeEnum(RoomConnectionStatus),
-	userRole: z.enum(["host", "guest"]).optional(),
+	roomPermissions: z.object({
+		role: z.enum(["host", "guest", "spectator"]),
+		permissions: z.object({
+			can_share: z.boolean(),
+			can_close: z.boolean(),
+			can_set_roles: z.boolean(),
+			can_kick: z.boolean()
+		})
+	}).optional(),
 	roomData: z.object({
 		id: z.string(),
 		name: z.string(),
