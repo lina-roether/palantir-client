@@ -1,6 +1,6 @@
 import { ClosedEvent, Connection, ConnectionOptions, ErrorEvent } from "./connection";
 import { baseLogger } from "./logger";
-import { Message, RoomPermissionsMsgBody, RoomStateMsgBody } from "./messages";
+import { Message, RoomPermissionsMsgBodyV1, RoomStateMsgBodyV1 } from "./messages";
 import { TypedEvent, TypedEventTarget } from "./utils";
 import * as uuid from "uuid";
 
@@ -241,7 +241,7 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		this.broadcastStateUpdate();
 	}
 
-	private updateRoomData(state: RoomStateMsgBody) {
+	private updateRoomData(state: RoomStateMsgBodyV1) {
 		this.roomData = {
 			id: uuid.stringify(state.id),
 			name: state.name,
@@ -255,7 +255,7 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 		this.broadcastStateUpdate();
 	}
 
-	private updateRoomPermissions(body: RoomPermissionsMsgBody) {
+	private updateRoomPermissions(body: RoomPermissionsMsgBodyV1) {
 		logger.debug(`Recieved room permissions: ${JSON.stringify(body)}`)
 		this.roomPermissions = {
 			role: body.role,

@@ -5,118 +5,118 @@ import { baseLogger } from "./logger";
 
 const logger = baseLogger.sub("messages");
 
-const ConnectionLoginMsgBodySchema = z.object({
+const ConnectionLoginMsgBodyV1Schema = z.object({
 	username: z.string(),
 	api_key: z.string().optional(),
 });
 
-export type ConnectionLoginMsgBody = z.infer<typeof ConnectionLoginMsgBodySchema>;
+export type ConnectionLoginMsgBodyV1 = z.infer<typeof ConnectionLoginMsgBodyV1Schema>;
 
-const ConnectionClientErrorMsgBodySchema = z.object({
+const ConnectionClientErrorMsgBodyV1Schema = z.object({
 	message: z.string(),
 });
-export type ConnectionClientErrorMsgBody = z.infer<typeof ConnectionClientErrorMsgBodySchema>;
+export type ConnectionClientErrorMsgBodyV1 = z.infer<typeof ConnectionClientErrorMsgBodyV1Schema>;
 
-const ConnectionClosedReasonSchema = z.enum([
+const ConnectionClosedReasonV1Schema = z.enum([
 	"unauthorized",
 	"server_error",
 	"room_closed",
 	"timeout",
 	"unknown",
 ]);
-export type ConnectionClosedReason = z.infer<typeof ConnectionClosedReasonSchema>;
+export type ConnectionClosedReasonV1 = z.infer<typeof ConnectionClosedReasonV1Schema>;
 
-const ConnectionClosedMsgBodySchema = z.object({
-	reason: ConnectionClosedReasonSchema,
+const ConnectionClosedMsgBodyV1Schema = z.object({
+	reason: ConnectionClosedReasonV1Schema,
 	message: z.string(),
 });
-export type ConnectionClosedMsgBody = z.infer<typeof ConnectionClosedMsgBodySchema>;
+export type ConnectionClosedMsgBodyV1 = z.infer<typeof ConnectionClosedMsgBodyV1Schema>;
 
-const RoomCreateMsgBodySchema = z.object({
+const RoomCreateMsgBodyV1Schema = z.object({
 	name: z.string(),
 	password: z.string(),
 });
-export type RoomCreateMsgBody = z.infer<typeof RoomCreateMsgBodySchema>;
+export type RoomCreateMsgBodyV1 = z.infer<typeof RoomCreateMsgBodyV1Schema>;
 
-const RoomJoinMsgBodySchema = z.object({
+const RoomJoinMsgBodyV1Schema = z.object({
 	id: z.instanceof(Uint8Array),
 	password: z.string(),
 });
-export type RoomJoinMsgBody = z.infer<typeof RoomJoinMsgBodySchema>;
+export type RoomJoinMsgBodyV1 = z.infer<typeof RoomJoinMsgBodyV1Schema>;
 
-const RoomUserRoleSchema = z.enum([
+const RoomUserRoleV1Schema = z.enum([
 	"host",
 	"guest",
 	"spectator"
 ]);
-export type RoomUserRole = z.infer<typeof RoomUserRoleSchema>;
+export type RoomUserRoleV1 = z.infer<typeof RoomUserRoleV1Schema>;
 
-const RoomUserPermissionsSchema = z.object({
+const RoomUserPermissionsV1Schema = z.object({
 	can_host: z.boolean(),
 	can_close: z.boolean(),
 	can_set_roles: z.boolean(),
 	can_kick: z.boolean(),
 })
-export type RoomUserPermsissions = z.infer<typeof RoomUserPermissionsSchema>;
+export type RoomUserPermsissionsV1 = z.infer<typeof RoomUserPermissionsV1Schema>;
 
-const RoomUserSchema = z.object({
+const RoomUserV1Schema = z.object({
 	id: z.instanceof(Uint8Array),
 	name: z.string(),
-	role: RoomUserRoleSchema
+	role: RoomUserRoleV1Schema
 });
-export type RoomUser = z.infer<typeof RoomUserSchema>;
+export type RoomUserV1 = z.infer<typeof RoomUserV1Schema>;
 
-const RoomStateMsgBodySchema = z.object({
+const RoomStateMsgBodyV1Schema = z.object({
 	id: z.instanceof(Uint8Array),
 	name: z.string(),
 	password: z.string(),
-	users: z.array(RoomUserSchema),
+	users: z.array(RoomUserV1Schema),
 });
-export type RoomStateMsgBody = z.infer<typeof RoomStateMsgBodySchema>;
+export type RoomStateMsgBodyV1 = z.infer<typeof RoomStateMsgBodyV1Schema>;
 
-const RoomPermissionsMsgBodySchema = z.object({
-	role: RoomUserRoleSchema,
-	permissions: RoomUserPermissionsSchema
+const RoomPermissionsMsgBodyV1Schema = z.object({
+	role: RoomUserRoleV1Schema,
+	permissions: RoomUserPermissionsV1Schema
 });
-export type RoomPermissionsMsgBody = z.infer<typeof RoomPermissionsMsgBodySchema>;
+export type RoomPermissionsMsgBodyV1 = z.infer<typeof RoomPermissionsMsgBodyV1Schema>;
 
-const RoomDisconnectedReason = z.enum(["closed_by_host", "unauthorized", "server_error"]);
-export type RoomDisconnected = z.infer<typeof RoomDisconnectedReason>;
+const RoomDisconnectedReasonV1Schema = z.enum(["closed_by_host", "unauthorized", "server_error"]);
+export type RoomDisconnectedReasonV1 = z.infer<typeof RoomDisconnectedReasonV1Schema>;
 
-const RoomDisconnectedMsgBodySchema = z.object({
-	reason: RoomDisconnectedReason,
+const RoomDisconnectedMsgBodyV1Schema = z.object({
+	reason: RoomDisconnectedReasonV1Schema,
 });
-export type RoomDisconnectedMsgBody = z.infer<typeof RoomDisconnectedMsgBodySchema>;
+export type RoomDisconnectedMsgBodyV1 = z.infer<typeof RoomDisconnectedMsgBodyV1Schema>;
 
-const RoomKickUserMsgBodySchema = z.object({
+const RoomKickUserMsgBodyV1Schema = z.object({
 	user_id: z.instanceof(Uint8Array)
 });
-export type RoomKickUserMsgBody = z.infer<typeof RoomKickUserMsgBodySchema>;
+export type RoomKickUserMsgBodyV1 = z.infer<typeof RoomKickUserMsgBodyV1Schema>;
 
 const EmptyMessageBodySchema = z.object({});
 
 const MessageBodySchema = z.discriminatedUnion("m", [
-	ConnectionLoginMsgBodySchema.extend({ m: z.literal("connection::login/v1") }),
+	ConnectionLoginMsgBodyV1Schema.extend({ m: z.literal("connection::login/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("connection::login_ack/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("connection::ping/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("connection::pong/v1") }),
-	ConnectionClientErrorMsgBodySchema.extend({ m: z.literal("connection::client_error/v1") }),
-	ConnectionClosedMsgBodySchema.extend({ m: z.literal("connection::closed/v1") }),
+	ConnectionClientErrorMsgBodyV1Schema.extend({ m: z.literal("connection::client_error/v1") }),
+	ConnectionClosedMsgBodyV1Schema.extend({ m: z.literal("connection::closed/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("connection::keepalive/v1") }),
-	RoomCreateMsgBodySchema.extend({ m: z.literal("room::create/v1") }),
+	RoomCreateMsgBodyV1Schema.extend({ m: z.literal("room::create/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("room::create_ack/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("room::close/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("room::close_ack/v1") }),
-	RoomJoinMsgBodySchema.extend({ m: z.literal("room::join/v1") }),
+	RoomJoinMsgBodyV1Schema.extend({ m: z.literal("room::join/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("room::join_ack/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("room::leave/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("room::leave_ack/v1") }),
-	RoomDisconnectedMsgBodySchema.extend({ m: z.literal("room::disconnected/v1") }),
+	RoomDisconnectedMsgBodyV1Schema.extend({ m: z.literal("room::disconnected/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("room::request_state/v1") }),
-	RoomStateMsgBodySchema.extend({ m: z.literal("room::state/v1") }),
-	RoomKickUserMsgBodySchema.extend({ m: z.literal("room::kick_user/v1") }),
+	RoomStateMsgBodyV1Schema.extend({ m: z.literal("room::state/v1") }),
+	RoomKickUserMsgBodyV1Schema.extend({ m: z.literal("room::kick_user/v1") }),
 	EmptyMessageBodySchema.extend({ m: z.literal("room::request_permissions/v1") }),
-	RoomPermissionsMsgBodySchema.extend({ m: z.literal("room::permissions/v1") }),
+	RoomPermissionsMsgBodyV1Schema.extend({ m: z.literal("room::permissions/v1") }),
 ]);
 export type MessageBody = z.infer<typeof MessageBodySchema>;
 
