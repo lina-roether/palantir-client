@@ -31,7 +31,7 @@ export const SessionStateMessageSchema = z.object({
 	roomPermissions: z.object({
 		role: z.enum(["host", "guest", "spectator"]),
 		permissions: z.object({
-			can_share: z.boolean(),
+			can_host: z.boolean(),
 			can_close: z.boolean(),
 			can_set_roles: z.boolean(),
 			can_kick: z.boolean()

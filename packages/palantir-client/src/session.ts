@@ -7,7 +7,7 @@ import * as uuid from "uuid";
 const logger = baseLogger.sub("session");
 
 export interface UserPermissions {
-	can_share: boolean,
+	can_host: boolean,
 	can_close: boolean,
 	can_kick: boolean,
 	can_set_roles: boolean
@@ -132,7 +132,7 @@ export class Session extends TypedEventTarget<SessionEventMap> {
 	}
 
 	public getState(): SessionState {
-		const state =  {
+		const state = {
 			roomConnectionStatus: this.roomConnectionStatus(),
 			roomData: this.roomData ?? undefined,
 			roomPermissions: this.roomPermissions ?? undefined

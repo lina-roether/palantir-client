@@ -52,7 +52,7 @@ const RoomUserRoleSchema = z.enum([
 export type RoomUserRole = z.infer<typeof RoomUserRoleSchema>;
 
 const RoomUserPermissionsSchema = z.object({
-	can_share: z.boolean(),
+	can_host: z.boolean(),
 	can_close: z.boolean(),
 	can_set_roles: z.boolean(),
 	can_kick: z.boolean(),
